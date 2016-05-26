@@ -20,11 +20,11 @@ fi
 
 cp /etc/bind/steamcache/template.db.content_.steampowered.com /etc/bind/steamcache/db.content_.steampowered.com
 cp /etc/bind/steamcache/template.db.cs.steampowered.com /etc/bind/steamcache/db.cs.steampowered.com
-cp /etc/bind/steamcache/template.db.origin-a.akamaihd.net /etc/bind/steamcache/db.origin-a.akamaihd.net
+cp /etc/bind/steamcache/template.db.lancache /etc/bind/steamcache/db.lancache
 
 sed -i -e "s%{{ steamcache_ip }}%$STEAMCACHE_IP%g" /etc/bind/steamcache/db.content_.steampowered.com
 sed -i -e "s%{{ steamcache_ip }}%$STEAMCACHE_IP%g" /etc/bind/steamcache/db.cs.steampowered.com
-sed -i -e "s%{{ lancache_ip }}%$LANCACHE_IP%g" /etc/bind/steamcache/db.origin-a.akamaihd.net
+sed -i -e "s%{{ lancache_ip }}%$LANCACHE_IP%g" /etc/bind/steamcache/db.lancache
 
 /usr/sbin/named -u named -c /etc/bind/named.conf -f
 
