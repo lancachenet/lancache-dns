@@ -6,6 +6,6 @@ $TTL	  600
 		                  	600
 		                  	600 )
 @		            IN	    NS	    ns1
-ns1	          	IN	    A	      {{ steamcache_ip }}
+ns1	          	IN	    A	      {{ lancache_ip }}
 
-@	              IN	    A	      {{ steamcache_ip }}
+@	              IN	    A	      {{ lancache_ip }}
