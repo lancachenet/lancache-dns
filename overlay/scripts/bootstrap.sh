@@ -18,6 +18,8 @@ then
 	exit 1
 fi
 
+echo "Running bootstrap.sh..."
+
 ## blizzard
 cp /etc/bind/cache/blizzard/template.db.blizzard /etc/bind/cache/blizzard/db.blizzard
 
@@ -57,4 +59,4 @@ sed -i -e "s%{{ windowscache_ip }}%$WINDOWSCACHE_IP%g" /etc/bind/cache/windows/d
 
 /usr/sbin/named -u named -c /etc/bind/named.conf -f
 
-sleep 10000
+echo "bootsrap finished."
