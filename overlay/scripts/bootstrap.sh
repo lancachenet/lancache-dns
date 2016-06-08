@@ -57,6 +57,8 @@ sed -i -e "s%{{ uplaycache_ip }}%$UPLAYCACHE_IP%g" /etc/bind/cache/uplay/db.upla
 sed -i -e "s%{{ windowscache_ip }}%$WINDOWSCACHE_IP%g" /etc/bind/cache/windows/db.windows
 
 
+echo "bootsrap finished."
+
 /usr/sbin/named -u named -c /etc/bind/named.conf -f
 
-echo "bootsrap finished."
+sleep 1000
