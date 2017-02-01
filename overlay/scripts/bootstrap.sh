@@ -58,6 +58,19 @@ sed -i -e "s%{{ windowscache_ip }}%$WINDOWSCACHE_IP%g" /etc/bind/cache/windows/d
 
 echo "bootsrap finished."
 
-/usr/sbin/named -u named -c /etc/bind/named.conf -f
+echo "checking Bind9 config"
 
-sleep 1000
+if ! /usr/sbin/named-checkconf /etc/bind/named.conf ; then
+	echo "Problem with Bind9 configuration - Bailing" >&2
+	exit 1
+fi
+
+echo "Running Bind9"
+
+/usr/sbin/named -u named -c /etc/bind/named.conf -f
+BEC=$?
+
+if ! [ $BEC = 0 ]; then
+	echo "Bind9 exited with ${BEC}"
+	exit ${BEC} #exit with the same exit code as bind9
+fi
