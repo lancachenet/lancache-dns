@@ -87,8 +87,10 @@ if ! [ -z "$STEAMCACHE_IP" ]; then
 	echo "Enabling cache for Steam"
 	cp /etc/bind/cache/steam/template.db.content_.steampowered.com /etc/bind/cache/steam/db.content_.steampowered.com
 	cp /etc/bind/cache/steam/template.db.cs.steampowered.com /etc/bind/cache/steam/db.cs.steampowered.com
+	cp /etc/bind/cache/steam/template.db.steamcontent.com /etc/bind/cache/steam/db.steamcontent.com
 	sed -i -e "s%{{ steamcache_ip }}%$STEAMCACHE_IP%g" /etc/bind/cache/steam/db.content_.steampowered.com
 	sed -i -e "s%{{ steamcache_ip }}%$STEAMCACHE_IP%g" /etc/bind/cache/steam/db.cs.steampowered.com
+	sed -i -e "s%{{ steamcache_ip }}%$STEAMCACHE_IP%g" /etc/bind/cache/steam/db.steamcontent.com
 	sed -i -e "s%#ENABLE_STEAM#%%g" /etc/bind/cache.conf
 fi
 
