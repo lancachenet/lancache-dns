@@ -8,9 +8,9 @@ RUN	apk update			\
 
 COPY	overlay/ /
 
-RUN	mkdir /var/cache/bind			\
-	&& chmod 755 /scripts/*			\
-	&& chown named:named /var/cache/bind
+RUN	mkdir -p /var/cache/bind /var/log/named		\
+	&& chmod 755 /scripts/*				\
+	&& chown named:named /var/cache/bind /var/log/named
 
 
 EXPOSE 53/udp
