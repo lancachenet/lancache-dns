@@ -11,7 +11,7 @@ The primary use case is gaming events, such as LAN parties, which need to be abl
 Run the steamcache-dns container using the following to allow UDP port 53 (DNS) through the host machine:
 
 ```
-docker run --name steamcache-dns -p 192.168.0.5:53:53/udp -e STEAMCACHE_IP=10.0.0.3 steamcache/steamcache-dns:latest
+docker run --name steamcache-dns -p 10.0.0.2:53:53/udp -e STEAMCACHE_IP=10.0.0.3 steamcache/steamcache-dns:latest
 ```
 
 The image needs to know the IP of the steamcache server, provide this via the STEAMCACHE_IP variable.
