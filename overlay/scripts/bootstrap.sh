@@ -20,40 +20,93 @@
 
 echo "Running bootstrap.sh..."
 
+if [ "$USE_GENERIC_CACHE" = "true" ]; then
+	# We will use the generic cache IP for anything that is not defined.
+
+	if [ -z "$LANCACHE_IP" ]; then
+		echo "USE_GENERIC_CACHE is true but LANCACHE_IP is not set. Ignoring Generic Cache"
+	else
+		if [ -z "$BLIZZARDCACHE_IP" ] && ! [ "$DISABLE_BLIZZARD" = "true" ]; then
+			BLIZZARDCACHE_IP=$LANCACHE_IP
+		fi
+		if [ -z "$FRONTIERCACHE_IP" ] && ! [ "$DISABLE_FRONTIER" = "true" ]; then
+			FRONTIERCACHE_IP=$LANCACHE_IP
+		fi
+		if [ -z "$ORIGINCACHE_IP" ] && ! [ "$DISABLE_ORIGIN" = "true" ]; then
+			ORIGINCACHE_IP=$LANCACHE_IP
+		fi
+		if [ -z "$RIOTCACHE_IP" ] && ! [ "$DISABLE_RIOT" = "true" ]; then
+			RIOTCACHE_IP=$LANCACHE_IP
+		fi
+		if [ -z "$STEAMCACHE_IP" ] && ! [ "$DISABLE_STEAM" = "true" ]; then
+			STEAMCACHE_IP=$LANCACHE_IP
+		fi
+		if [ -z "$UPLAYCACHE_IP" ] && ! [ "$DISABLE_UPLAY" = "true" ]; then
+			UPLAYCACHE_IP=$LANCACHE_IP
+		fi
+		if [ -z "$WINDOWSCACHE_IP" ] && ! [ "$DISABLE_WINDOWS" = "true" ]; then
+			WINDOWSCACHE_IP=$LANCACHE_IP
+		fi
+	fi
+fi
+
 ## blizzard
-cp /etc/bind/cache/blizzard/template.db.blizzard /etc/bind/cache/blizzard/db.blizzard
+if ! [ -z "$BLIZZARDCACHE_IP" ]; then
+	echo "Enabling cache for Blizzard"
+	cp /etc/bind/cache/blizzard/template.db.blizzard /etc/bind/cache/blizzard/db.blizzard
+	sed -i -e "s%{{ blizzardcache_ip }}%$BLIZZARDCACHE_IP%g" /etc/bind/cache/blizzard/db.blizzard
+	sed -i -e "s%#ENABLE_BLIZZARD#%%g" /etc/bind/cache.conf
+fi
 
 ## frontier
-cp /etc/bind/cache/frontier/template.db.frontier /etc/bind/cache/frontier/db.frontier
-
+if ! [ -z "$FRONTIERCACHE_IP" ]; then
+	echo "Enabling cache for Frontier"
+	cp /etc/bind/cache/frontier/template.db.frontier /etc/bind/cache/frontier/db.frontier
+	sed -i -e "s%{{ frontiercache_ip }}%$FRONTIERCACHE_IP%g" /etc/bind/cache/frontier/db.frontier
+	sed -i -e "s%#ENABLE_FRONTIER#%%g" /etc/bind/cache.conf
+fi
 
 ## origin
-cp /etc/bind/cache/origin/template.db.origin /etc/bind/cache/origin/db.origin
-
+if ! [ -z "$ORIGINCACHE_IP" ]; then
+	echo "Enabling cache for Origin"
+	cp /etc/bind/cache/origin/template.db.origin /etc/bind/cache/origin/db.origin
+	sed -i -e "s%{{ origincache_ip }}%$ORIGINCACHE_IP%g" /etc/bind/cache/origin/db.origin
+	sed -i -e "s%#ENABLE_ORIGIN#%%g" /etc/bind/cache.conf
+fi
 
 ## riot
-cp /etc/bind/cache/riot/template.db.riot /etc/bind/cache/riot/db.riot
+if ! [ -z "$RIOTCACHE_IP" ]; then
+	echo "Enabling cache for Riot"
+	cp /etc/bind/cache/riot/template.db.riot /etc/bind/cache/riot/db.riot
+	sed -i -e "s%{{ riotcache_ip }}%$RIOTCACHE_IP%g" /etc/bind/cache/riot/db.riot
+	sed -i -e "s%#ENABLE_RIOT#%%g" /etc/bind/cache.conf
+fi
 
 ## steam
-cp /etc/bind/cache/steam/template.db.content_.steampowered.com /etc/bind/cache/steam/db.content_.steampowered.com
-cp /etc/bind/cache/steam/template.db.cs.steampowered.com /etc/bind/cache/steam/db.cs.steampowered.com
-
+if ! [ -z "$STEAMCACHE_IP" ]; then
+	echo "Enabling cache for Steam"
+	cp /etc/bind/cache/steam/template.db.content_.steampowered.com /etc/bind/cache/steam/db.content_.steampowered.com
+	cp /etc/bind/cache/steam/template.db.cs.steampowered.com /etc/bind/cache/steam/db.cs.steampowered.com
+	sed -i -e "s%{{ steamcache_ip }}%$STEAMCACHE_IP%g" /etc/bind/cache/steam/db.content_.steampowered.com
+	sed -i -e "s%{{ steamcache_ip }}%$STEAMCACHE_IP%g" /etc/bind/cache/steam/db.cs.steampowered.com
+	sed -i -e "s%#ENABLE_STEAM#%%g" /etc/bind/cache.conf
+fi
 
 ## uplay
-cp /etc/bind/cache/uplay/template.db.uplay /etc/bind/cache/uplay/db.uplay
-
+if ! [ -z "$UPLAYCACHE_IP" ]; then
+	echo "Enabling cache for Uplay"
+	cp /etc/bind/cache/uplay/template.db.uplay /etc/bind/cache/uplay/db.uplay
+	sed -i -e "s%{{ uplaycache_ip }}%$UPLAYCACHE_IP%g" /etc/bind/cache/uplay/db.uplay
+	sed -i -e "s%#ENABLE_UPLAY#%%g" /etc/bind/cache.conf
+fi
 
 ## windows
-cp /etc/bind/cache/windows/template.db.windows /etc/bind/cache/windows/db.windows
-
-sed -i -e "s%{{ blizzardcache_ip }}%$BLIZZARDCACHE_IP%g" /etc/bind/cache/blizzard/db.blizzard
-sed -i -e "s%{{ frontiercache_ip }}%$FRONTIERCACHE_IP%g" /etc/bind/cache/frontier/db.frontier
-sed -i -e "s%{{ origincache_ip }}%$ORIGINCACHE_IP%g" /etc/bind/cache/origin/db.origin
-sed -i -e "s%{{ riotcache_ip }}%$RIOTCACHE_IP%g" /etc/bind/cache/riot/db.riot
-sed -i -e "s%{{ steamcache_ip }}%$STEAMCACHE_IP%g" /etc/bind/cache/steam/db.content_.steampowered.com
-sed -i -e "s%{{ steamcache_ip }}%$STEAMCACHE_IP%g" /etc/bind/cache/steam/db.cs.steampowered.com
-sed -i -e "s%{{ uplaycache_ip }}%$UPLAYCACHE_IP%g" /etc/bind/cache/uplay/db.uplay
-sed -i -e "s%{{ windowscache_ip }}%$WINDOWSCACHE_IP%g" /etc/bind/cache/windows/db.windows
+if ! [ -z "$WINDOWSCACHE_IP" ]; then
+	echo "Enabling cache for Windows"
+	cp /etc/bind/cache/windows/template.db.windows /etc/bind/cache/windows/db.windows
+	sed -i -e "s%{{ windowscache_ip }}%$WINDOWSCACHE_IP%g" /etc/bind/cache/windows/db.windows
+	sed -i -e "s%#ENABLE_WINDOWS#%%g" /etc/bind/cache.conf
+fi
 
 
 echo "bootsrap finished."
