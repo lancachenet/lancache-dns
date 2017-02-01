@@ -5,7 +5,7 @@ options {
         allow-recursion { any; };
         allow-query { any; };
         allow-query-cache { any; };
-        listen-on { 10.0.0.1; };
+        listen-on { any; };
         listen-on-v6 { any; };
 };
 
