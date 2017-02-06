@@ -6,7 +6,7 @@ options {
         allow-query { any; };
         allow-query-cache { any; };
         listen-on { any; };
-        listen-on-v6 { any; };       
+        listen-on-v6 { any; };
 };
 
 logging {
