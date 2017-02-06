@@ -111,7 +111,7 @@ if ! [ -z "$WINDOWSCACHE_IP" ]; then
 fi
 
 
-echo "bootsrap finished."
+echo "bootstrap finished."
 
 echo "checking Bind9 config"
 
