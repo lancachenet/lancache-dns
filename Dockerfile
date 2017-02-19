@@ -12,6 +12,7 @@ RUN	mkdir -p /var/cache/bind /var/log/named		\
 	&& chmod 755 /scripts/*				\
 	&& chown named:named /var/cache/bind /var/log/named
 
+COPY	root/ /
 
 EXPOSE 53/udp
 
