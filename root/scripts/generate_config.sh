@@ -27,6 +27,8 @@ address=/dist.blizzard.com/$STEAMCACHE_IP
 address=/blizzard.vo.llnwd.net/$STEAMCACHE_IP
 address=/blzddist1-a.akamaihd.net/$STEAMCACHE_IP
 address=/blzddist2-a.akamaihd.net/$STEAMCACHE_IP
+address=/blzddist3-a.akamaihd.net/$STEAMCACHE_IP
+address=/level3.blizzard.com/$STEAMCACHE_IP
 
 # Frontier
 address=/cdn.zaonce.net/$STEAMCACHE_IP
