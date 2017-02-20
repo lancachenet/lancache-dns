@@ -8,13 +8,13 @@ The primary use case is gaming events, such as LAN parties, which need to be abl
 
 ## Usage
 
-Run the steamcache-dns container using the following to allow UDP port 53 (DNS) through the host machine:
+Run the steamcache-dns container using the following to allow UDP port 53 (DNS) through the host machine. Replace `STEAMCACHE_IP` with the IP address of your steamcache server.
 
 ```
 docker run -it --name steamcache-dns -p 53:53/udp -e STEAMCACHE_IP=10.0.0.3 steamcache-dns
 ```
 
-Replace `STEAMCACHE_IP` with the IP address of your steamcache server.
+Add the `-d` argument to run the docker container in the background. Logs can then be accessed using `docker logs steamcache`.
 
 ## Quick Explaination
 
@@ -25,6 +25,10 @@ For a steam cache to function on your network you need two services.
 The depot cache service transparently proxies your requests for content to Steam, or serves the content to you if it already has it.
 
 The special DNS service handles DNS queries normally (recursively), except when they're about Steam and in that case it responds that the depot cache service should be used.
+
+## DNS Entries
+
+Modify `root/scripts/generate_config.sh` to add or remove DNS entries. These will occasionally change as game clients are updated.
 
 ## Running on Startup
 
