@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This docker container provides DNS entries for \*.cs.steampowered.com to be used in conjunction with a steamcache server.
+This docker container provides DNS entries to be used in conjunction with a steamcache server.
 
 The primary use case is gaming events, such as LAN parties, which need to be able to cope with hundreds or thousands of computers receiving an unannounced patch - without spending a fortune on internet connectivity. Other uses include smaller networks, such as Internet Cafes and home networks, where the new games are regularly installed on multiple computers; or multiple independent operating systems on the same computer.
 
@@ -11,8 +11,10 @@ The primary use case is gaming events, such as LAN parties, which need to be abl
 Run the steamcache-dns container using the following to allow UDP port 53 (DNS) through the host machine:
 
 ```
-docker run -d --name steamcache-dns -p 53:53/udp -v /data:/data -e STEAMCACHE_IP=10.0.0.3 steamcache-dns
+docker run -it --name steamcache-dns -p 53:53/udp -e STEAMCACHE_IP=10.0.0.3 steamcache-dns
 ```
+
+Replace `STEAMCACHE_IP` with the IP address of your steamcache server.
 
 ## Quick Explaination
 
@@ -27,7 +29,7 @@ The special DNS service handles DNS queries normally (recursively), except when 
 ## Running on Startup
 
 Follow the instructions in the Docker documentation to run the container at startup.
-[Documentation](https://docs.docker.com/articles/host_integration/)
+[Documentation](https://docs.docker.com/engine/admin/host_integration/)
 
 ## Further information
 

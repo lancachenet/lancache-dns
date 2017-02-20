@@ -6,8 +6,6 @@ RUN	apk update \
 
 COPY root/ /
 
-VOLUME [ "/data" ]
-
 EXPOSE 53/udp
 
 ENTRYPOINT [ "/scripts/bootstrap.sh" ]
