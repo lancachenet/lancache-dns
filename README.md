@@ -71,7 +71,7 @@ More information can be found at the [SteamCache github page](http://steamcache.
 
 The MIT License (MIT)
 
-Copyright (c) 2015 Jessica Smith, Robin Lewis, Brian Wojtczak, Jason Rivers
+Copyright (c) 2015-2017 Jessica Smith, Robin Lewis, Brian Wojtczak, Jason Rivers
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
