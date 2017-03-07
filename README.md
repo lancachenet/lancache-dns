@@ -32,7 +32,7 @@ The special DNS service handles DNS queries normally (recursively), except when 
 
 ## DNS Entries
 
-Modify `root/scripts/generate_config.sh` to add or remove DNS entries. These will occasionally change as game clients are updated.
+Modify `etc/dnsmasq.d/steamcache.conf` to add or remove DNS entries. These will occasionally change as game clients are updated.
 
 ## Running on Startup
 

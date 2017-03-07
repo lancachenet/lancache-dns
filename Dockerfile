@@ -4,8 +4,8 @@ MAINTAINER SteamCache.Net Team <team@steamcache.net>
 RUN	apk update \
 	&& apk add dnsmasq
 
-COPY root/ /
+COPY . /
 
 EXPOSE 53/udp
 
-ENTRYPOINT [ "/scripts/bootstrap.sh" ]
+ENTRYPOINT [ "steamcache-dns" ]

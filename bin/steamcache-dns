@@ -1,0 +1,13 @@
+#!/bin/sh
+set -e
+
+if [ -z "$STEAMCACHE_IP" ]
+then
+ 	echo "No value for \$STEAMCACHE_IP!" >&2
+ 	exit 1
+fi
+
+sed -i "s/\$STEAMCACHE_IP/$STEAMCACHE_IP/g" /etc/dnsmasq.d/steamcache.conf
+
+dnsmasq --test
+exec dnsmasq -k --log-facility=/dev/stdout --log-queries
