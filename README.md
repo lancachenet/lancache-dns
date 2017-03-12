@@ -14,7 +14,7 @@ Run the steamcache-dns container using the following to allow UDP port 53 (DNS) 
 docker run -it --name steamcache-dns -p 53:53/udp -e STEAMCACHE_IP=10.0.0.3 steamcache/steamcache-dns:latest
 ```
 
-#### Generic Cache
+### Generic Cache
 
 The image needs to know the IP of the steamcache server, provide this via the `STEAMCACHE_IP` environment variable. If you're also using the generic cache server, you can set the `LANCACHE_IP` environment variable.
 
@@ -47,11 +47,12 @@ DISABLE_UPLAY
 DISABLE_WINDOWS
 ```
 
-#### Additional Docker Options
+### Additional Docker Options
 
 * `-d` will run the docker container in the background. Access the logs with `docker logs steamcache-dns`.
 * `--network host` will use the host networking stack for improved performance.
 * `--log-opt max-size=10m --log-opt max-file=3` will automatically rotate container logs.
+* `-it` will attach an interactive tty for debugging but is not needed in production.
 
 ## Quick Explaination
 
