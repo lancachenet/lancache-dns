@@ -8,13 +8,46 @@ The primary use case is gaming events, such as LAN parties, which need to be abl
 
 ## Usage
 
-Run the steamcache-dns container using the following to allow UDP port 53 (DNS) through the host machine. Replace `STEAMCACHE_IP` with the IP address of your steamcache server.
+Run the steamcache-dns container using the following to allow UDP port 53 (DNS) through the host machine.
 
 ```
-docker run -it --name steamcache-dns -p 53:53/udp -e STEAMCACHE_IP=10.0.0.3 kixelated/steamcache-dns:latest
+docker run -it --name steamcache-dns -p 53:53/udp -e STEAMCACHE_IP=10.0.0.3 steamcache/steamcache-dns:latest
 ```
 
-#### Additional options
+#### Generic Cache
+
+The image needs to know the IP of the steamcache server, provide this via the `STEAMCACHE_IP` environment variable. If you're also using the generic cache server, you can set the `LANCACHE_IP` environment variable.
+
+Example running a steamcache + generic cache:
+```
+docker run -it --name steamcache-dns -p 53:53/udp -e STEAMCACHE_IP=10.0.0.3 -e LANCACHE_IP=10.0.0.4 steamcache/steamcache-dns:latest
+```
+
+You can specify a different IP for each service hosted within the cache, with the following environment variables:
+```
+LANCACHE_IP (default value for all below)
+
+BLIZZARDCACHE_IP
+FRONTIERCACHE_IP
+ORIGINCACHE_IP
+RIOTCACHE_IP
+STEAMCACHE_IP
+UPLAYCACHE_IP
+WINDOWSCACHE_IP
+```
+
+You can also disable any of the cache dns resolvers by setting the following environment variables:
+```
+DISABLE_BLIZZARD
+DISABLE_FRONTIER
+DISABLE_ORIGIN
+DISABLE_RIOT
+DISABLE_STEAM
+DISABLE_UPLAY
+DISABLE_WINDOWS
+```
+
+#### Additional Docker Options
 
 * `-d` will run the docker container in the background. Access the logs with `docker logs steamcache`.
 * `--network host` will use the host networking stack for improved performance.

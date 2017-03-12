@@ -1,13 +1,35 @@
 #!/bin/sh
 set -e
 
-if [ -z "$STEAMCACHE_IP" ]
-then
- 	echo "No value for \$STEAMCACHE_IP!" >&2
- 	exit 1
-fi
+# Loop over each of the available services and update the dnsmasq config file.
+SERVICES="BLIZZARD FRONTIER ORIGIN RIOT STEAM UPLAY WINDOWS"
+for SERVICE in $SERVICES; do
+	# Alpine Linux doesn't ship with bash so we use the more portable eval.
+	# Get the variable that disables the current service.
+	eval SERVICE_DISABLE_NAME="DISABLE_\${SERVICE}"
+	eval SERVICE_DISABLE="\$${SERVICE_DISABLE_NAME}"
 
-sed -i "s/\$STEAMCACHE_IP/$STEAMCACHE_IP/g" /etc/dnsmasq.d/steamcache.conf
+	# Get the variable that contains the IP for current service.
+	eval SERVICE_IP_NAME="\${SERVICE}CACHE_IP"
+	eval SERVICE_IP="\$${SERVICE_IP_NAME}"
 
+	# If this service doesn't have an IP, use the LANCACHE_IP value instead.
+	if [ -z "$SERVICE_IP" ]; then
+		SERVICE_IP=$LANCACHE_IP
+	fi
+
+	if [ -n "$SERVICE_IP" ] && [ -z "$SERVICE_DISABLE" ]; then
+		# Replace any references for this service's IP.
+		sed -i "s/\$$SERVICE_IP_NAME/$SERVICE_IP/g" /etc/dnsmasq.d/steamcache.conf
+		echo "$SERVICE enabled"
+	else
+		# Remove any references for this service's IP.
+		sed -i "/\$$SERVICE_IP_NAME/d" /etc/dnsmasq.d/steamcache.conf
+	fi
+done
+
+# Test the dnsmasq config.
 dnsmasq --test
+
+# Finally, start up dnsmasq.
 exec dnsmasq -k --log-facility=/dev/stdout --log-queries
