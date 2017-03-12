@@ -49,7 +49,7 @@ DISABLE_WINDOWS
 
 #### Additional Docker Options
 
-* `-d` will run the docker container in the background. Access the logs with `docker logs steamcache`.
+* `-d` will run the docker container in the background. Access the logs with `docker logs steamcache-dns`.
 * `--network host` will use the host networking stack for improved performance.
 * `--log-opt max-size=10m --log-opt max-file=3` will automatically rotate container logs.
 
