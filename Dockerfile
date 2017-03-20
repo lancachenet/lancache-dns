@@ -4,7 +4,7 @@ MAINTAINER SteamCache.Net Team <team@steamcache.net>
 RUN	apk update \
 	&& apk add dnsmasq
 
-COPY . /
+COPY overlay/ /
 
 EXPOSE 53/udp
 
