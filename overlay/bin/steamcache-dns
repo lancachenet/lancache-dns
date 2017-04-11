@@ -1,6 +1,10 @@
 #!/bin/sh
 set -e
 
+# Make a temporary directory for the dnsmasq config.
+CONFIG_FILE=$(mktemp "/tmp/dnsmasq.conf.XXXXXX")
+cp /etc/dnsmasq.d/steamcache.conf.tmpl "$CONFIG_FILE"
+
 # Loop over each of the available services and update the dnsmasq config file.
 SERVICES="BLIZZARD FRONTIER ORIGIN RIOT STEAM UPLAY WINDOWS"
 for SERVICE in $SERVICES; do
@@ -20,16 +24,16 @@ for SERVICE in $SERVICES; do
 
 	if [ -n "$SERVICE_IP" ] && [ -z "$SERVICE_DISABLE" ]; then
 		# Replace any references for this service's IP.
-		sed -i "s/\$$SERVICE_IP_NAME/$SERVICE_IP/g" /etc/dnsmasq.d/steamcache.conf
+		sed -i "s/\$$SERVICE_IP_NAME/$SERVICE_IP/g" "$CONFIG_FILE"
 		echo "$SERVICE enabled"
 	else
 		# Remove any references for this service's IP.
-		sed -i "/\$$SERVICE_IP_NAME/d" /etc/dnsmasq.d/steamcache.conf
+		sed -i "/\$$SERVICE_IP_NAME/d" "$CONFIG_FILE"
 	fi
 done
 
 # Test the dnsmasq config.
-dnsmasq --test
+dnsmasq -C "$CONFIG_FILE" --test
 
 # Finally, start up dnsmasq.
-exec dnsmasq -k --log-facility=/dev/stdout --log-queries
+exec dnsmasq -C "$CONFIG_FILE" -k --log-facility=/dev/stdout --log-queries
