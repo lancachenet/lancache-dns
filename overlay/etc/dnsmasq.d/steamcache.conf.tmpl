@@ -5,8 +5,12 @@ group=root
 # Docker adds some weird stuff to /etc/hosts.
 no-hosts
 
-# Cache any local IPs for an hour.
-# This is 0 by default, but one lost packet causes Windows to switch DNS.
+# Cache the last x resolved DNS entries for fast lookup.
+# The default is 150 entries, which seems too small.
+cache-size=1000
+
+# Tell clients to cache any local (steamcache) addresses for an hour.
+# The default value is 0, which causes clients to constantly resolve addresses.
 local-ttl=3600
 
 # NOTE The address command also matches all subdomains.
