@@ -1,0 +1,58 @@
+# Run as root to make things easy.
+user=root
+group=root
+
+# Docker adds some weird stuff to /etc/hosts.
+no-hosts
+
+# Cache the last x resolved DNS entries for fast lookup.
+# The default is 150 entries, which seems too small.
+cache-size=1000
+
+# Tell clients to cache any local (steamcache) addresses for an hour.
+# The default value is 0, which causes clients to constantly resolve addresses.
+local-ttl=3600
+
+# Proxy DNSSEC authentication from upstream DNS servers.
+# This authentication is only as trust-worthy as the upstream DNS server.
+proxy-dnssec
+
+# NOTE The address command also matches all subdomains.
+
+# Blizzard
+address=/dist.blizzard.com.edgesuite.net/$BLIZZARDCACHE_IP
+address=/llnw.blizzard.com/$BLIZZARDCACHE_IP
+address=/dist.blizzard.com/$BLIZZARDCACHE_IP
+address=/level3.blizzard.com/$BLIZZARDCACHE_IP
+address=/blizzard.vo.llnwd.net/$BLIZZARDCACHE_IP
+address=/blzddist1-a.akamaihd.net/$BLIZZARDCACHE_IP
+address=/blzddist2-a.akamaihd.net/$BLIZZARDCACHE_IP
+address=/blzddist3-a.akamaihd.net/$BLIZZARDCACHE_IP
+
+# Frontier
+address=/cdn.zaonce.net/$FRONTIERCACHE_IP
+
+# Origin
+address=/origin-a.akamaihd.net/$ORIGINCACHE_IP
+address=/cdn.ea.com/$ORIGINCACHE_IP
+
+# Riot
+address=/l3cdn.riotgames.com/$RIOTCACHE_IP
+
+# Steam
+address=/cs.steampowered.com/$STEAMCACHE_IP
+address=/steamcontent.com/$STEAMCACHE_IP
+address=/content1.steampowered.com/$STEAMCACHE_IP
+address=/content2.steampowered.com/$STEAMCACHE_IP
+address=/content3.steampowered.com/$STEAMCACHE_IP
+address=/content4.steampowered.com/$STEAMCACHE_IP
+address=/content5.steampowered.com/$STEAMCACHE_IP
+address=/content6.steampowered.com/$STEAMCACHE_IP
+address=/content7.steampowered.com/$STEAMCACHE_IP
+address=/content8.steampowered.com/$STEAMCACHE_IP
+
+# Uplay
+address=/cdn.ubi.com/$UPLAYCACHE_IP
+
+# Windows
+address=/download.windowsupdate.com/$WINDOWSCACHE_IP
