@@ -33,7 +33,7 @@ for SERVICE in $SERVICES; do
 done
 
 # Test the dnsmasq config.
-dnsmasq -C "$CONFIG_FILE" --test
+dnsmasq --conf-file="$CONFIG_FILE" --test
 
 # Finally, start up dnsmasq.
-exec dnsmasq -C "$CONFIG_FILE" -k --log-facility=/dev/stdout --log-queries
+exec dnsmasq --conf-file="$CONFIG_FILE" --keep-in-foreground --log-facility=/dev/stdout --log-queries
