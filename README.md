@@ -50,6 +50,7 @@ DISABLE_WINDOWS
 ### Additional Docker Options
 
 * `-d` will run the docker container in the background. Access the logs with `docker logs steamcache-dns`.
+* `--dns 8.8.8.8 --dns 8.8.4.4` will use the given DNS servers instead of the host's settings. You must use this option if you make steamcache-dns your network DNS server via DHCP.
 * `--network host` will use the host networking stack for improved performance.
 * `--log-opt max-size=10m --log-opt max-file=3` will automatically rotate container logs.
 * `-it` will attach an interactive tty for debugging but is not needed in production.
