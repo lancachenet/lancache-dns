@@ -110,6 +110,13 @@ if ! [ -z "$WINDOWSCACHE_IP" ]; then
 	sed -i -e "s%#ENABLE_WINDOWS#%%g" /etc/bind/cache.conf
 fi
 
+## custom upstream forwarder
+if ! [ -z "$UPSTREAM_DNS" ]; then
+        echo "Enabling custom DNS forwarder"
+	sed -i -e "s%dns_ip%$UPSTREAM_DNS%g" /etc/bind/named.conf.options
+	sed -i -e "s%#ENABLE_UPSTREAM_DNS#%%g" /etc/bind/named.conf.options
+fi
+
 
 echo "bootstrap finished."
 

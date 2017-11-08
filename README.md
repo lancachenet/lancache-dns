@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This docker container provides DNS entries for \*.cs.steampowered.com to be used in conjunction with a steamcache server. 
+This docker container provides DNS entries for \*.cs.steampowered.com to be used in conjunction with a steamcache server.
 
 The primary use case is gaming events, such as LAN parties, which need to be able to cope with hundreds or thousands of computers receiving an unannounced patch - without spending a fortune on internet connectivity. Other uses include smaller networks, such as Internet Cafes and home networks, where the new games are regularly installed on multiple computers; or multiple independent operating systems on the same computer.
 
@@ -47,6 +47,14 @@ DISABLE_WINDOWS
 
 ```
 
+To use a custom upstream DNS server, use the `UPSTREAM_DNS` variable:
+
+```
+docker run --name steamcache-dns -p 10.0.0.2:53:53/udp -e STEAMCACHE_IP=10.0.0.3 -e UPSTREAM_DNS=8.8.8.8 steamcache/steamcache-dns:latest
+```
+
+This will add a forwarder for all queries not served by steamcache to be sent to the upstream DNS server, in this case Google's DNS.  If
+you have a DNS server on 1.2.3.4, the command argument would be `-e UPSTREAM_DNS=1.2.3.4`.
 
 ## Quick Explaination
 
