@@ -35,6 +35,9 @@ if [ "$USE_GENERIC_CACHE" = "true" ]; then
 		if [ -z "$ORIGINCACHE_IP" ] && ! [ "$DISABLE_ORIGIN" = "true" ]; then
 			ORIGINCACHE_IP=$LANCACHE_IP
 		fi
+		if [ -z "$NINTENDOCACHE_IP" ] && ! [ "$DISABLE_NINTENDO" = "true" ]; then
+			NINTENDOCACHE_IP=$LANCACHE_IP
+		fi
 		if [ -z "$RIOTCACHE_IP" ] && ! [ "$DISABLE_RIOT" = "true" ]; then
 			RIOTCACHE_IP=$LANCACHE_IP
 		fi
@@ -72,6 +75,13 @@ if ! [ -z "$ORIGINCACHE_IP" ]; then
 	cp /etc/bind/cache/origin/template.db.origin /etc/bind/cache/origin/db.origin
 	sed -i -e "s%{{ origincache_ip }}%$ORIGINCACHE_IP%g" /etc/bind/cache/origin/db.origin
 	sed -i -e "s%#ENABLE_ORIGIN#%%g" /etc/bind/cache.conf
+fi
+## Nintendo
+if ! [ -z "$NINTENDOCACHE_IP" ]; then
+	echo "Enabling cache for Nintendo"
+	cp /etc/bind/cache/nintendo/template.db.nintendo /etc/bind/cache/nintendo/db.nintendo
+	sed -i -e "s%{{ nintendocache_ip }}%$NINTENDOCACHE_IP%g" /etc/bind/cache/nintendo/db.nintendo
+	sed -i -e "s%#ENABLE_NINTENDO#%%g" /etc/bind/cache.conf
 fi
 
 ## riot
