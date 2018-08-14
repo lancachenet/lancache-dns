@@ -1,0 +1,13 @@
+$TTL    600
+@       IN  SOA ns1 dns.steamcache.net. (
+            {{DATE}}
+            604800
+            600
+            600
+            600 )
+@       IN  NS  ns1
+ns1     IN  A   {{ service_ip }}
+
+@       IN  A   {{ service_ip }}
+*       IN  A   {{ service_ip }}
+

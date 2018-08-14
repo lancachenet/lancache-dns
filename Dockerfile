@@ -3,8 +3,11 @@ MAINTAINER SteamCache.Net Team <team@steamcache.net>
 
 ENV STEAMCACHE_DNS_VERSION 1
 
-RUN	apk update			\
-	&& apk add bind		
+RUN	apk update && apk add			\
+		bind	\
+		bash	\
+		jq		\
+		curl	
 
 COPY	overlay/ /
 
@@ -17,4 +20,4 @@ EXPOSE 53/udp
 
 WORKDIR /scripts
 
-ENTRYPOINT ["/scripts/bootstrap.sh"]
+CMD ["bash", "/scripts/bootstrap.sh"]
