@@ -15,11 +15,30 @@ echo "|___/\\__\\___|\\__,_|_| |_| |_|\\___\\__,_|\\___|_| |_|\\___(_)_| |_|\\__
 echo ""
 echo ""
 
+
+if ! [ -z "${USE_GENERIC_CACHE}" ]; then
+  if [ -z ${LANCACHE_IP} ]; then
+    echo "If you are using USE_GENERIC_CACHE then you must set LANCACHE_IP"
+    exit 1
+  fi
+else
+  if ! [ -z ${LANCACHE_IP} ]; then
+    echo "If you are using LANCACHE_IP then you must set USE_GENERIC_CACHE=true"
+    exit 1
+  fi
+fi
+
 echo "Bootstrapping DNS from https://github.com/uklans/cache-domains"
 
 if ! [ -z "${USE_GENERIC_CACHE}" ]; then
+    echo ""
+    echo "----------------------------------------------------------------------"
     echo "Using Generic Server: ${LANCACHE_IP}"
-    echo "Make sure you are using a load balancer at ${LANCACHE_IP}, it is not recommended to use a single cache server for all services as you will get cache clashes."
+    echo "Make sure you are using a load balancer at ${LANCACHE_IP}"
+    echo "it is not recommended to use a single cache server for all services"
+    echo "as you will get cache clashes."
+    echo "----------------------------------------------------------------------"
+    echo ""
 fi
 
 rm -f ${CACHECONF}
@@ -28,41 +47,59 @@ touch ${CACHECONF}
 curl -s -o services.json https://raw.githubusercontent.com/uklans/cache-domains/master/cache_domains.json
 
 cat services.json | jq -r '.cache_domains[] | .name, .domain_files[]' | while read L; do
-
-
-    if ! echo ${L} | grep "\.txt" >/dev/null 2>&1 ; then
-      SERVICE=${L}
-      SERVICEUC=`echo ${L} | tr [:lower:] [:upper:]`
-      echo "setting up ${SERVICE}"
+  if ! echo ${L} | grep "\.txt" >/dev/null 2>&1 ; then
+#    if [ "${L}" = "steam" ]; then
+#      set -x
+#    else
+#      set +x
+#    fi
+    SERVICE=${L}
+    SERVICEUC=`echo ${L} | tr [:lower:] [:upper:]`
+    if ! env | grep "DISABLE_${SERVICEUC}=true" >/dev/null 2>&1; then
+      if env | grep "${SERVICEUC}CACHE_IP" >/dev/null 2>&1; then
+        C_IP=$(env | grep "${SERVICEUC}CACHE_IP=" | sed 's/.*=//')
+      else
+        C_IP=${LANCACHE_IP}
+      fi
+      if [ "$USE_GENERIC_CACHE" = "true" ] && ! [ -z "${C_IP}" ] ; then
+        echo "Setting up ${SERVICE} -> ${C_IP}"
+      else
+        echo "Creating ${SERVICE} template"
+      fi
       echo "## ${SERVICE}" >> ${CACHECONF}
-    else
-
-	curl -s -o ${L} https://raw.githubusercontent.com/uklans/cache-domains/master/${L}
-	## files don't have a newline at the end
-	echo "" >> ${L}
-	cat ${L} | grep -v "^#" | while read URL; do
-
-	if [ "x${URL}" != "x" ] ; then
-        ## remove the *. from the begging if it's there.
-        URL=$(echo ${URL} | sed 's/^\*\.//;s/,//g')
-        if ! grep "${URL}" ${CACHECONF} 1>/dev/null 2>&1; then
-            if [ "$USE_GENERIC_CACHE" = "true" ] && ! [ -z "${LANCACHE_IP}" ] ; then
-                echo "zone \"${URL}\" in { type master; file \"/etc/bind/cache/${SERVICE}.db\";};" >> ${CACHECONF}
-                cat ${ZONETEMPLATE} | sed "s/{{DATE}}/$(date +%Y%m%d%M)/;s/{{ service_ip }}/${LANCACHE_IP}/g" > ${ZONEPATH}/${SERVICE}.db
-            else
-                echo "#ENABLE_${SERVICEUC}#zone \"${URL}\" in { type master; file \"/etc/bind/cache/${SERVICE}.db\";};" >> ${CACHECONF}
-                cat ${ZONETEMPLATE} | sed "s/{{DATE}}/$(date +%Y%m%d%M)/;s/{{ service_ip }}/{{ ${SERVICE}_ip }}/g" > ${ZONEPATH}/${SERVICE}.db
-            fi
-        fi
-	fi
-	done
-    echo "" >> ${CACHECONF}
-    rm ${L}
     fi
+  else
 
+    if ! env | grep "DISABLE_${SERVICEUC}=true" >/dev/null 2>&1; then
+      curl -s -o ${L} https://raw.githubusercontent.com/uklans/cache-domains/master/${L}
+    	## files don't have a newline at the end
+    	echo "" >> ${L}
+    	cat ${L} | grep -v "^#" | while read URL; do
+      	if [ "x${URL}" != "x" ] ; then
+          ## remove the *. from the begging if it's there.
+          URL=$(echo ${URL} | sed 's/^\*\.//;s/,//g')
+          if ! grep "${URL}" ${CACHECONF} 1>/dev/null 2>&1; then
+            if [ "$USE_GENERIC_CACHE" = "true" ] && ! [ -z "${C_IP}" ] ; then
+              echo "zone \"${URL}\" in { type master; file \"/etc/bind/cache/${SERVICE}.db\";};" >> ${CACHECONF}
+              cat ${ZONETEMPLATE} | sed "s/{{DATE}}/$(date +%Y%m%d%M)/;s/{{ service_ip }}/${C_IP}/g" > ${ZONEPATH}/${SERVICE}.db
+            else
+              echo "#ENABLE_${SERVICEUC}#zone \"${URL}\" in { type master; file \"/etc/bind/cache/${SERVICE}.db\";};" >> ${CACHECONF}
+              cat ${ZONETEMPLATE} | sed "s/{{DATE}}/$(date +%Y%m%d%M)/;s/{{ service_ip }}/{{ ${SERVICE}_ip }}/g" > ${ZONEPATH}/${SERVICE}.db
+            fi
+          fi
+      	fi
+    	done
+      echo "" >> ${CACHECONF}
+      rm ${L}
+    fi
+  fi
 done
 
 rm services.json
+
+echo ""
+echo " --- "
+echo ""
 
 enableService() {
     SERVICE=$1
@@ -79,10 +116,10 @@ enableService() {
 }
 if [ -z "$USE_GENERIC_CACHE" ]; then
 
-    env | grep "ENABLE" | while read SERVICE; do
+    env | grep -v LANCACHE_IP | grep "CACHE_IP" | while read SERVICE; do
 
-        S=$(echo ${SERVICE} | sed 's/ENABLE_//;s/=.*//')
-        I=$(env | grep "${S}_IP" | sed 's/.*=//')
+        S=$(echo ${SERVICE} | sed 's/CACHE_IP.*//')
+        I=$(env | grep "${S}CACHE_IP" | sed 's/.*=//')
 
         if ! [ -z "${S}" ] && ! [ -z "${I}" ]; then
             echo "Enabling ${S} on IP ${I}"
@@ -92,8 +129,11 @@ if [ -z "$USE_GENERIC_CACHE" ]; then
     done
 fi
 
-
 echo "finished bootstrapping."
+
+echo ""
+echo " --- "
+echo ""
 
 echo "checking Bind9 config"
 
