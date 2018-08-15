@@ -131,6 +131,7 @@ fi
 
 if ! [ -z "${UPSTREAM_DNS}"] ; then
   sed -i "s/#ENABLE_UPSTREAM_DNS#//;s/dns_ip/${UPSTREAM_DNS}/" /etc/bind/cache/named.conf.options
+fi
 
 echo "finished bootstrapping."
 
