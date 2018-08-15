@@ -129,6 +129,9 @@ if [ -z "$USE_GENERIC_CACHE" ]; then
     done
 fi
 
+if ! [ -z "${UPSTREAM_DNS}"] ; then
+  sed -i "s/#ENABLE_UPSTREAM_DNS#//;s/dns_ip/${UPSTREAM_DNS}/" /etc/bind/cache/named.conf.options
+
 echo "finished bootstrapping."
 
 echo ""
@@ -143,6 +146,8 @@ if ! /usr/sbin/named-checkconf /etc/bind/named.conf ; then
 fi
 
 echo "Running Bind9"
+
+tail -F /var/log/named/general.log /var/log/named/default.log /var/log/named/queries.log  &
 
 /usr/sbin/named -u named -c /etc/bind/named.conf -f
 BEC=$?
