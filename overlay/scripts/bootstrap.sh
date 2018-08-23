@@ -14,6 +14,12 @@ echo "\\__ \\ ||  __/ (_| | | | | | | (_| (_| | (__| | | |  __/_| | | |  __/ |_ 
 echo "|___/\\__\\___|\\__,_|_| |_| |_|\\___\\__,_|\\___|_| |_|\\___(_)_| |_|\\___|\\__|"
 echo ""
 echo ""
+if ! [ -z "${UPSTREAM_DNS}" ] ; then
+  echo "configuring /etc/resolv.conf to stop from looping to ourself"
+  echo "nameserver ${UPSTREAM_DNS}" > /etc/resolv.conf
+fi
+echo ""
+
 
 
 if ! [ -z "${USE_GENERIC_CACHE}" ]; then
