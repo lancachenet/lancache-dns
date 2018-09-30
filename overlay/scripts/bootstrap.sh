@@ -139,6 +139,11 @@ if ! [ -z "${UPSTREAM_DNS}" ] ; then
   sed -i "s/#ENABLE_UPSTREAM_DNS#//;s/dns_ip/${UPSTREAM_DNS}/" /etc/bind/named.conf.options
 fi
 
+if ! [ -z "${DISABLE_DNSSEC_VALIDATION}" ] ; then
+  sed -i "s/dnssec_validation//;s/auto/no/" /etc/bind/named.conf.options
+  echo "Disabling dnssec validation"
+fi
+
 echo "finished bootstrapping."
 
 echo ""
