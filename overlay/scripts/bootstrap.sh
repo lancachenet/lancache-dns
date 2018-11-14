@@ -5,6 +5,7 @@ set -e
 ZONEPATH="/etc/bind/cache/"
 ZONETEMPLATE="/etc/bind/cache/zone.tmpl"
 CACHECONF="/etc/bind/cache.conf"
+USE_GENERIC_CACHE="${USE_GENERIC_CACHE:-false}"
 
 echo "     _                                      _                       _   "
 echo "    | |                                    | |                     | |  "
@@ -22,7 +23,7 @@ echo ""
 
 
 
-if ! [ -z "${USE_GENERIC_CACHE}" ]; then
+if [ "$USE_GENERIC_CACHE" = "true" ]; then
   if [ -z ${LANCACHE_IP} ]; then
     echo "If you are using USE_GENERIC_CACHE then you must set LANCACHE_IP"
     exit 1
@@ -36,7 +37,7 @@ fi
 
 echo "Bootstrapping DNS from https://github.com/uklans/cache-domains"
 
-if ! [ -z "${USE_GENERIC_CACHE}" ]; then
+if [ "$USE_GENERIC_CACHE" = "true" ]; then
     echo ""
     echo "----------------------------------------------------------------------"
     echo "Using Generic Server: ${LANCACHE_IP}"
@@ -120,7 +121,7 @@ enableService() {
         sed -i -e "s%#ENABLE_${SERVICE}#%%g" ${CACHECONF}
     fi
 }
-if [ -z "$USE_GENERIC_CACHE" ]; then
+if [ "$USE_GENERIC_CACHE" == "false" ]; then
 
     env | grep -v LANCACHE_IP | grep "CACHE_IP" | while read SERVICE; do
 
