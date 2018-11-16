@@ -125,9 +125,9 @@ if [ "$USE_GENERIC_CACHE" == "false" ]; then
 
     env | grep -v LANCACHE_IP | grep "CACHE_IP" | while read SERVICE; do
 
-	    if ! env | grep "DISABLE_${SERVICE}=true" >/dev/null 2>&1; then
-	        S=$(echo ${SERVICE} | sed 's/CACHE_IP.*//')
-	        I=$(env | grep "${S}CACHE_IP" | sed 's/.*=//')
+	    S=$(echo ${SERVICE} | sed 's/CACHE_IP.*//')
+	    I=$(env | grep "${S}CACHE_IP" | sed 's/.*=//')
+	    if ! env | grep "DISABLE_${S}=true" >/dev/null 2>&1; then
 	
 	        if ! [ -z "${S}" ] && ! [ -z "${I}" ]; then
 	            echo "Enabling ${S} on IP ${I}"
