@@ -62,7 +62,7 @@ you have a DNS server on 1.2.3.4, the command argument would be `-e UPSTREAM_DNS
 ## Running on Startup
 
 Follow the instructions in the Docker documentation to run the container at startup.
-[Documentation](https://docs.docker.com/articles/host_integration/)
+[Documentation](https://docs.docker.com/config/containers/start-containers-automatically/)
 
 ## Further information
 
