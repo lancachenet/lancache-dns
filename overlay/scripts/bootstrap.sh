@@ -103,11 +103,12 @@ cat services.json | jq -r '.cache_domains[] | .name, .domain_files[]' | while re
 			SERVICE_ENABLED=true	
 		fi
 	else
+		echo "testing for presence of ${SERVICEUC}CACHE_IP"
     	if env | grep "${SERVICEUC}CACHE_IP" >/dev/null 2>&1; then
 			SERVICE_ENABLED=true
 		fi
 	fi
-	if [ $SERVICE_ENABLED ]; then
+	if [ "$SERVICE_ENABLED" == "true" ]; then
     	if env | grep "${SERVICEUC}CACHE_IP" >/dev/null 2>&1; then
     		C_IP=$(env | grep "${SERVICEUC}CACHE_IP=" | sed 's/.*=//')
     	else
@@ -129,7 +130,7 @@ cat services.json | jq -r '.cache_domains[] | .name, .domain_files[]' | while re
 	fi
 
   else
-	if [ $CONTINUE ]; then
+	if [ "$CONTINUE" == "true" ]; then
 
       curl -s -o ${L} https://raw.githubusercontent.com/uklans/cache-domains/master/${L}
     	## files don't have a newline at the end
