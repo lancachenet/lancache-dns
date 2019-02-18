@@ -6,7 +6,9 @@ ZONEPATH="/etc/bind/cache/"
 ZONETEMPLATE="/etc/bind/cache/zone.tmpl"
 CACHECONF="/etc/bind/cache.conf"
 USE_GENERIC_CACHE="${USE_GENERIC_CACHE:-false}"
-CACHE_DOMAIN="some-username-here1/cache-domains/minecraft"
+GITHUB_USERNAME="uklans"
+GITHUB_BRANCH="master"
+GITHUB="${GITHUB_USERNAME}/cache-domains/$GITHUB_BRANCH"
 
 echo "     _                                      _                       _   "
 echo "    | |                                    | |                     | |  "
@@ -36,7 +38,7 @@ else
   fi
 fi
 
-echo "Bootstrapping DNS from https://github.com/${CACHE_DOMAIN}"
+echo "Bootstrapping DNS from https://github.com/${GITHUB}"
 
 if [ "$USE_GENERIC_CACHE" = "true" ]; then
     echo ""
@@ -52,7 +54,7 @@ fi
 rm -f ${CACHECONF}
 touch ${CACHECONF}
 
-curl -s -o services.json https://raw.githubusercontent.com/${CACHE_DOMAIN}/cache_domains.json
+curl -s -o services.json https://raw.githubusercontent.com/${GITHUB}/cache_domains.json
 
 cat services.json | jq -r '.cache_domains[] | .name, .domain_files[]' | while read L; do
   if ! echo ${L} | grep "\.txt" >/dev/null 2>&1 ; then
