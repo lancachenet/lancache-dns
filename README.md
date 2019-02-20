@@ -8,7 +8,7 @@ The DNS is generated automatically at startup of the container, the list of supp
 
 The primary use case is gaming events, such as LAN parties, which need to be able to cope with hundreds or thousands of computers receiving an unannounced patch - without spending a fortune on internet connectivity. Other uses include smaller networks, such as Internet Cafes and home networks, where the new games are regularly installed on multiple computers; or multiple independent operating systems on the same computer.
 
-## Quick Explaination
+## Quick Explanation
 
 For a LAN cache to function on your network you need two services.
 * A depot cache service
