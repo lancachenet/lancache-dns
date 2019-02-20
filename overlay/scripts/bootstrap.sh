@@ -6,6 +6,9 @@ ZONEPATH="/etc/bind/cache/"
 ZONETEMPLATE="/etc/bind/cache/zone.tmpl"
 CACHECONF="/etc/bind/cache.conf"
 USE_GENERIC_CACHE="${USE_GENERIC_CACHE:-false}"
+LANCACHE_DNSDOMAIN="${LANCACHE_DNSDOMAIN:-cache.steamcache.net}"
+CACHE_ZONE="${ZONEPATH}$LANCACHE_DNSDOMAIN.db"
+RPZ_ZONE="${ZONEPATH}rpz.db"
 
 echo "     _                                      _                       _   "
 echo "    | |                                    | |                     | |  "
@@ -41,9 +44,7 @@ if [ "$USE_GENERIC_CACHE" = "true" ]; then
     echo ""
     echo "----------------------------------------------------------------------"
     echo "Using Generic Server: ${LANCACHE_IP}"
-    echo "Make sure you are using a load balancer at ${LANCACHE_IP}"
-    echo "it is not recommended to use a single cache server for all services"
-    echo "as you will get cache clashes."
+    echo "Make sure you are using a monolithic cache or load balancer at ${LANCACHE_IP}"
     echo "----------------------------------------------------------------------"
     echo ""
 fi
@@ -51,52 +52,95 @@ fi
 rm -f ${CACHECONF}
 touch ${CACHECONF}
 
+#Add the rpz zones to the cache.conf
+echo "
+	zone \"$LANCACHE_DNSDOMAIN\" {
+		type master;
+		file \"$CACHE_ZONE\";
+	};
+    zone \"rpz\" {
+      type master;
+      file \"$RPZ_ZONE\";
+      allow-query { none; };
+    };" > ${CACHECONF}
+
+#Generate the SOA for cache.steamcache.net
+
+echo "\$ORIGIN $LANCACHE_DNSDOMAIN. 
+\$TTL    600
+@       IN  SOA localhost. dns.steamcache.net. (
+             $(date +%s)
+             604800
+             600
+             600
+             600 )
+@       IN  NS  localhost.
+
+" > $CACHE_ZONE
+
+#Generate the RPZ zone file
+
+echo "\$TTL 60
+@            IN    SOA  localhost. root.localhost.  (
+                          2   ; serial 
+                          3H  ; refresh 
+                          1H  ; retry 
+                          1W  ; expiry 
+                          1H) ; minimum 
+                  IN    NS    localhost." > $RPZ_ZONE
+
 curl -s -o services.json https://raw.githubusercontent.com/uklans/cache-domains/master/cache_domains.json
 
 cat services.json | jq -r '.cache_domains[] | .name, .domain_files[]' | while read L; do
   if ! echo ${L} | grep "\.txt" >/dev/null 2>&1 ; then
-#    if [ "${L}" = "steam" ]; then
-#      set -x
-#    else
-#      set +x
-#    fi
     SERVICE=${L}
     SERVICEUC=`echo ${L} | tr [:lower:] [:upper:]`
-    if ! env | grep "DISABLE_${SERVICEUC}=true" >/dev/null 2>&1; then
-      if env | grep "${SERVICEUC}CACHE_IP" >/dev/null 2>&1; then
-        C_IP=$(env | grep "${SERVICEUC}CACHE_IP=" | sed 's/.*=//')
-      else
-        C_IP=${LANCACHE_IP}
-      fi
-      if [ "$USE_GENERIC_CACHE" = "true" ] && ! [ -z "${C_IP}" ] ; then
-        echo "Setting up ${SERVICE} -> ${C_IP}"
-      else
-        echo "Creating ${SERVICE} template"
-      fi
-      echo "## ${SERVICE}" >> ${CACHECONF}
-    fi
-  else
+	echo "Processing service: $SERVICE"
+	CONTINUE=false
+	SERVICE_ENABLED=false
+	if [ "$USE_GENERIC_CACHE" = "true" ]; then
+    	if ! env | grep "DISABLE_${SERVICEUC}=true" >/dev/null 2>&1; then
+			SERVICE_ENABLED=true	
+		fi
+	else
+		echo "testing for presence of ${SERVICEUC}CACHE_IP"
+    	if env | grep "${SERVICEUC}CACHE_IP" >/dev/null 2>&1; then
+			SERVICE_ENABLED=true
+		fi
+	fi
+	if [ "$SERVICE_ENABLED" == "true" ]; then
+    	if env | grep "${SERVICEUC}CACHE_IP" >/dev/null 2>&1; then
+    		C_IP=$(env | grep "${SERVICEUC}CACHE_IP=" | sed 's/.*=//')
+    	else
+    		C_IP=${LANCACHE_IP}
+    	fi
+		if [ "x$C_IP" != "x" ]; then
+			echo "Enabling service with ip(s): $C_IP";
+			for IP in $C_IP; do
+				echo "$SERVICE IN A $IP;" >> $CACHE_ZONE
+			done
+      		echo ";## ${SERVICE}" >> ${RPZ_ZONE}
+			CONTINUE=true
+		else
+			echo "Could not find IP for requested service: $SERVICE"
+			exit 1
+		fi
+	else
+		echo "Skipping $SERVICE"
+	fi
 
-    if ! env | grep "DISABLE_${SERVICEUC}=true" >/dev/null 2>&1; then
+  else
+	if [ "$CONTINUE" == "true" ]; then
+
       curl -s -o ${L} https://raw.githubusercontent.com/uklans/cache-domains/master/${L}
     	## files don't have a newline at the end
     	echo "" >> ${L}
-    	cat ${L} | grep -v "^#" | while read URL; do
-      	if [ "x${URL}" != "x" ] ; then
-          ## remove the *. from the begging if it's there.
-          URL=$(echo ${URL} | sed 's/^\*\.//;s/,//g')
-          if ! grep "${URL}" ${CACHECONF} 1>/dev/null 2>&1; then
-            if [ "$USE_GENERIC_CACHE" = "true" ] && ! [ -z "${C_IP}" ] ; then
-              echo "zone \"${URL}\" in { type master; file \"/etc/bind/cache/${SERVICE}.db\";};" >> ${CACHECONF}
-              cat ${ZONETEMPLATE} | sed "s/{{DATE}}/$(date +%Y%m%d%M)/;s/{{ service_ip }}/${C_IP}/g" > ${ZONEPATH}/${SERVICE}.db
-            else
-              echo "#ENABLE_${SERVICEUC}#zone \"${URL}\" in { type master; file \"/etc/bind/cache/${SERVICE}.db\";};" >> ${CACHECONF}
-              cat ${ZONETEMPLATE} | sed "s/{{DATE}}/$(date +%Y%m%d%M)/;s/{{ service_ip }}/{{ ${SERVICE}_ip }}/g" > ${ZONEPATH}/${SERVICE}.db
-            fi
-          fi
-      	fi
+		cat ${L} | grep -v "^#" | while read URL; do
+      		if [ "x${URL}" != "x" ] ; then
+				#RPZ entries do NOT need a trailing . on the rpz domain, but do for the redirect host
+				echo "${URL} IN CNAME $SERVICE.$LANCACHE_DNSDOMAIN.;" >> $RPZ_ZONE;
+      		fi
     	done
-      echo "" >> ${CACHECONF}
       rm ${L}
     fi
   fi
@@ -107,36 +151,6 @@ rm services.json
 echo ""
 echo " --- "
 echo ""
-
-enableService() {
-    SERVICE=$1
-    SERVICE_IP=$2
-
-    SERVICE_LC=`echo ${SERVICE} | tr [:upper:] [:lower:]`
-    ZONEFILE="/etc/bind/cache/${SERVICE_LC}.db"
-    echo "creating ${ZONEFILE}"
-
-    if ! [ -z "$SERVICE_IP" ]; then
-        sed -i -e "s%{{ ${SERVICE_LC}_ip }}%${SERVICE_IP}%g" ${ZONEFILE}
-        sed -i -e "s%#ENABLE_${SERVICE}#%%g" ${CACHECONF}
-    fi
-}
-if [ "$USE_GENERIC_CACHE" == "false" ]; then
-
-    env | grep -v LANCACHE_IP | grep "CACHE_IP" | while read SERVICE; do
-
-	    S=$(echo ${SERVICE} | sed 's/CACHE_IP.*//')
-	    I=$(env | grep "${S}CACHE_IP" | sed 's/.*=//')
-	    if ! env | grep "DISABLE_${S}=true" >/dev/null 2>&1; then
-	
-	        if ! [ -z "${S}" ] && ! [ -z "${I}" ]; then
-	            echo "Enabling ${S} on IP ${I}"
-	            enableService ${S} ${I}
-	        fi
-		fi
-
-    done
-fi
 
 if ! [ -z "${UPSTREAM_DNS}" ] ; then
   sed -i "s/#ENABLE_UPSTREAM_DNS#//;s/dns_ip/${UPSTREAM_DNS}/" /etc/bind/named.conf.options

@@ -7,6 +7,8 @@ options {
         allow-query-cache { any; };
         listen-on { any; };
         listen-on-v6 { any; };
+		response-policy { zone "rpz"; };
+		rrset-order { order cyclic; };
         #ENABLE_UPSTREAM_DNS#forwarders { dns_ip; };
 };
 
