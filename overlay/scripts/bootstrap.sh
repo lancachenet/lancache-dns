@@ -9,6 +9,9 @@ USE_GENERIC_CACHE="${USE_GENERIC_CACHE:-false}"
 LANCACHE_DNSDOMAIN="${LANCACHE_DNSDOMAIN:-cache.steamcache.net}"
 CACHE_ZONE="${ZONEPATH}$LANCACHE_DNSDOMAIN.db"
 RPZ_ZONE="${ZONEPATH}rpz.db"
+GITLAB_USERNAME="${GITLAB_USERNAME:-uklans}"
+GITLAB_BRANCH="${GITLAB_USERNAME:-master}"
+GITHUB="$GITHUB_USERNAME/cache-domains/$GITHUB_BRANCH"
 
 echo "     _                                      _                       _   "
 echo "    | |                                    | |                     | |  "
@@ -38,7 +41,7 @@ else
   fi
 fi
 
-echo "Bootstrapping DNS from https://github.com/uklans/cache-domains"
+echo "Bootstrapping DNS from https://github.com/$GITHUB"
 
 if [ "$USE_GENERIC_CACHE" = "true" ]; then
     echo ""
@@ -89,7 +92,7 @@ echo "\$TTL 60
                           1H) ; minimum 
                   IN    NS    localhost." > $RPZ_ZONE
 
-curl -s -o services.json https://raw.githubusercontent.com/uklans/cache-domains/master/cache_domains.json
+curl -s -o services.json https://raw.githubusercontent.com/$GITHUB/cache_domains.json
 
 cat services.json | jq -r '.cache_domains[] | .name, .domain_files[]' | while read L; do
   if ! echo ${L} | grep "\.txt" >/dev/null 2>&1 ; then
