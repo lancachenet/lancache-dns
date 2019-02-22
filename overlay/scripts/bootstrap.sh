@@ -135,7 +135,7 @@ cat services.json | jq -r '.cache_domains[] | .name, .domain_files[]' | while re
   else
 	if [ "$CONTINUE" == "true" ]; then
 
-      curl -s -o ${L} https://raw.githubusercontent.com/uklans/cache-domains/master/${L}
+      curl -s -o ${L} https://raw.githubusercontent.com/$GITHUB/${L}
     	## files don't have a newline at the end
     	echo "" >> ${L}
 		cat ${L} | grep -v "^#" | while read URL; do
