@@ -7,7 +7,8 @@ RUN	apk update && apk add			\
 		bind	\
 		bash	\
 		jq		\
-		curl	
+		curl	\
+		git
 
 COPY	overlay/ /
 
@@ -19,5 +20,7 @@ RUN	mkdir -p /var/cache/bind /var/log/named		\
 EXPOSE 53/udp
 
 WORKDIR /scripts
+
+RUN git clone https://github.com/uklans/cache-domains/ /opt/cache-domains
 
 CMD ["bash", "/scripts/bootstrap.sh"]

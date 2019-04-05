@@ -9,6 +9,7 @@ USE_GENERIC_CACHE="${USE_GENERIC_CACHE:-false}"
 LANCACHE_DNSDOMAIN="${LANCACHE_DNSDOMAIN:-cache.steamcache.net}"
 CACHE_ZONE="${ZONEPATH}$LANCACHE_DNSDOMAIN.db"
 RPZ_ZONE="${ZONEPATH}rpz.db"
+USE_LOCAL_DOMAIN_DATA=${USE_LOCAL_DOMAIN_DATA:-false}
 
 echo "     _                                      _                       _   "
 echo "    | |                                    | |                     | |  "
@@ -27,18 +28,22 @@ echo ""
 
 
 if [ "$USE_GENERIC_CACHE" = "true" ]; then
-  if [ -z ${LANCACHE_IP} ]; then
+  if [ -z "${LANCACHE_IP}" ]; then
     echo "If you are using USE_GENERIC_CACHE then you must set LANCACHE_IP"
     exit 1
   fi
 else
-  if ! [ -z ${LANCACHE_IP} ]; then
+  if ! [ -z "${LANCACHE_IP}" ]; then
     echo "If you are using LANCACHE_IP then you must set USE_GENERIC_CACHE=true"
     exit 1
   fi
 fi
 
-echo "Bootstrapping DNS from https://github.com/uklans/cache-domains"
+if [ "${USE_LOCAL_DOMAIN_DATA}" = "true" ]; then
+    echo "Bootstrapping DNS Local copy"
+else
+    echo "Bootstrapping DNS from https://github.com/uklans/cache-domains"
+fi
 
 if [ "$USE_GENERIC_CACHE" = "true" ]; then
     echo ""
@@ -89,7 +94,12 @@ echo "\$TTL 60
                           1H) ; minimum 
                   IN    NS    localhost." > $RPZ_ZONE
 
-curl -s -o services.json https://raw.githubusercontent.com/uklans/cache-domains/master/cache_domains.json
+if [ "${USE_LOCAL_DOMAIN_DATA}" = "true" ]; then
+    cp /opt/cache-domains/cache_domains.json ./services.json
+else
+    curl -s -o services.json https://raw.githubusercontent.com/uklans/cache-domains/master/cache_domains.json
+fi
+
 
 cat services.json | jq -r '.cache_domains[] | .name, .domain_files[]' | while read L; do
   if ! echo ${L} | grep "\.txt" >/dev/null 2>&1 ; then
@@ -116,7 +126,8 @@ cat services.json | jq -r '.cache_domains[] | .name, .domain_files[]' | while re
     	fi
 		if [ "x$C_IP" != "x" ]; then
 			echo "Enabling service with ip(s): $C_IP";
-			for IP in $C_IP; do
+            C_IPS=$(echo $C_IP | sed 's/,/ /g')
+			for IP in $C_IPS; do
 				echo "$SERVICE IN A $IP;" >> $CACHE_ZONE
 			done
       		echo ";## ${SERVICE}" >> ${RPZ_ZONE}
@@ -132,7 +143,11 @@ cat services.json | jq -r '.cache_domains[] | .name, .domain_files[]' | while re
   else
 	if [ "$CONTINUE" == "true" ]; then
 
-      curl -s -o ${L} https://raw.githubusercontent.com/uklans/cache-domains/master/${L}
+      if [ "${USE_LOCAL_DOMAIN_DATA}" = "true" ]; then
+          cp /opt/cache-domains/${L} ./${L}
+      else
+          curl -s -o ${L} https://raw.githubusercontent.com/uklans/cache-domains/master/${L}
+      fi
     	## files don't have a newline at the end
     	echo "" >> ${L}
 		cat ${L} | grep -v "^#" | while read URL; do
