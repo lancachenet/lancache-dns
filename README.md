@@ -60,11 +60,11 @@ you have a DNS server on 1.2.3.4, the command argument would be `-e UPSTREAM_DNS
 
 ## Custom Forks/Branches
 
-If you have your own fork (or branch) forked from [uklans/cache-domains](https://github.com/uklans/cache-domains) and would like to use your own for testing purposes (before pushing it to the main branch) or cache from unofficially supported domains, then declare the user's directory with `GITHUB_USERNAME` and the branch with `GITHUB_BRANCH` as so:
+If you have your own fork (or branch) forked from [uklans/cache-domains](https://github.com/uklans/cache-domains) and would like to use your own for testing purposes (before pushing it to the main branch) or cache from unofficially supported domains, then declare your username with `GITHUB_USERNAME` and your branch with `GITHUB_BRANCH` as so, for example:
 ```
 docker run --name steamcache-dns -p 10.0.0.2:53:53/udp -e GITHUB_USERNAME="example-username" -e GITHUB_BRANCH="example-branch" steamcache/steamcache-dns:latest
 ```
-giving that it would download the services and cache_domains.json from `https://github.com/example-username/uklans/example-branch`, and your new service, as a variable, would be `<SERVICE_NAME>CACHE_IP`
+giving that it would download the services and cache_domains.json from `https://github.com/example-username/uklans/example-branch`, and your new service, as a variable, would be `<SERVICE_NAME>CACHE_IP` from `<SERVICE_NAME>.txt`
 
 ## Multiple IPs
 
