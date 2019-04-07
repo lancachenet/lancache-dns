@@ -64,7 +64,7 @@ If you have your own fork (or branch) forked from [uklans/cache-domains](https:/
 ```
 docker run --name steamcache-dns -p 10.0.0.2:53:53/udp -e GITHUB_USERNAME="example-username" -e GITHUB_BRANCH="example-branch" steamcache/steamcache-dns:latest
 ```
-giving that it would download the services and cache_domains.json from `https://github.com/example-username/uklans/example-branch`, and your new service, as a variable, would be `<SERVICE_NAME>CACHE_IP` from `<SERVICE_NAME>.txt`
+giving that it would download the services and cache_domains.json from `https://github.com/example-username/uklans/example-branch` instead of the default, and your new service, as a variable, would be `<SERVICE_NAME>CACHE_IP` from `<SERVICE_NAME>.txt`
 
 ## Multiple IPs
 
