@@ -10,7 +10,7 @@ LANCACHE_DNSDOMAIN="${LANCACHE_DNSDOMAIN:-cache.steamcache.net}"
 CACHE_ZONE="${ZONEPATH}$LANCACHE_DNSDOMAIN.db"
 RPZ_ZONE="${ZONEPATH}rpz.db"
 GITHUB_USERNAME="${GITHUB_USERNAME:-uklans}"
-GITHUB_BRANCH="${GITHUB_USERNAME:-master}"
+GITHUB_BRANCH="${GITHUB_BRANCH:-master}"
 GITHUB="$GITHUB_USERNAME/cache-domains/$GITHUB_BRANCH"
 
 echo "     _                                      _                       _   "
