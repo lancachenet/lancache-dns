@@ -58,7 +58,7 @@ docker run --name steamcache-dns -p 10.0.0.2:53:53/udp -e STEAMCACHE_IP=10.0.0.3
 This will add a forwarder for all queries not served by steamcache to be sent to the upstream DNS server, in this case Google's DNS.  If
 you have a DNS server on 1.2.3.4, the command argument would be `-e UPSTREAM_DNS=1.2.3.4`.
 
-## Forks/Branches
+## Custom Forks/Branches
 
 If you have your own fork (or branch) forked from [uklans/cache-domains](https://github.com/uklans/cache-domains) and would like to use your own for testing purposes (before pushing it to the main branch) or cache from unofficially supported domains, then declare the user's directory with `GITHUB_USERNAME` and the branch with `GITHUB_BRANCH` as so:
 ```
