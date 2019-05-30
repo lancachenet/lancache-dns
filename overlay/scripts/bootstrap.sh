@@ -94,7 +94,8 @@ curl -s -o services.json https://raw.githubusercontent.com/uklans/cache-domains/
 cat services.json | jq -r '.cache_domains[] | .name, .domain_files[]' | while read L; do
   if ! echo ${L} | grep "\.txt" >/dev/null 2>&1 ; then
     SERVICE=${L}
-    SERVICEUC=`echo ${L} | tr [:lower:] [:upper:]`
+    # Uppercase service, strip non-alphanumeric characters and replace with underscores
+    SERVICEUC=`echo ${L} | sed 's/[^a-z0-9]\+/_/g' | tr [:lower:] [:upper:]`
 	echo "Processing service: $SERVICE"
 	CONTINUE=false
 	SERVICE_ENABLED=false
