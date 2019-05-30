@@ -1,7 +1,7 @@
 FROM alpine:latest
-MAINTAINER SteamCache.Net Team <team@steamcache.net>
+MAINTAINER LanCache.Net Team <team@lancache.net>
 
-ENV STEAMCACHE_DNS_VERSION=1 ENABLE_DNSSEC_VALIDATION=false LANCACHE_DNSDOMAIN=cache.steamcache.net
+ENV STEAMCACHE_DNS_VERSION=1 ENABLE_DNSSEC_VALIDATION=false LANCACHE_DNSDOMAIN=cache.lancache.net
 
 RUN	apk update && apk add			\
 		bind	\

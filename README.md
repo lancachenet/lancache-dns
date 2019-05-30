@@ -69,7 +69,7 @@ Follow the instructions in the Docker documentation to run the container at star
 
 ## Further information
 
-More information can be found at the [SteamCache github page](http://steamcache.net)
+More information can be found at the [LanCache github page](http://lancache.net)
 
 ## License
 

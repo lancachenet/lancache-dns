@@ -6,7 +6,7 @@ ZONEPATH="/etc/bind/cache/"
 ZONETEMPLATE="/etc/bind/cache/zone.tmpl"
 CACHECONF="/etc/bind/cache.conf"
 USE_GENERIC_CACHE="${USE_GENERIC_CACHE:-false}"
-LANCACHE_DNSDOMAIN="${LANCACHE_DNSDOMAIN:-cache.steamcache.net}"
+LANCACHE_DNSDOMAIN="${LANCACHE_DNSDOMAIN:-cache.lancache.net}"
 CACHE_ZONE="${ZONEPATH}$LANCACHE_DNSDOMAIN.db"
 RPZ_ZONE="${ZONEPATH}rpz.db"
 
@@ -64,11 +64,11 @@ echo "
       allow-query { none; };
     };" > ${CACHECONF}
 
-#Generate the SOA for cache.steamcache.net
+#Generate the SOA for cache.lancache.net
 
 echo "\$ORIGIN $LANCACHE_DNSDOMAIN. 
 \$TTL    600
-@       IN  SOA localhost. dns.steamcache.net. (
+@       IN  SOA localhost. dns.lancache.net. (
              $(date +%s)
              604800
              600
