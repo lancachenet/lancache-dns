@@ -9,7 +9,7 @@ USE_GENERIC_CACHE="${USE_GENERIC_CACHE:-false}"
 LANCACHE_DNSDOMAIN="${LANCACHE_DNSDOMAIN:-cache.lancache.net}"
 CACHE_ZONE="${ZONEPATH}$LANCACHE_DNSDOMAIN.db"
 RPZ_ZONE="${ZONEPATH}rpz.db"
-
+GITHUB_SOURCE=${GITHUB_SOURCE:-${GITHUB_SOURCE}}
 reverseip () {       
     local IFS        
     IFS=.            
@@ -45,7 +45,7 @@ else
   fi
 fi
 
-echo "Bootstrapping DNS from https://github.com/uklans/cache-domains"
+echo "Bootstrapping DNS from ${GITHUB_SOURCE}"
 
 if [ "$USE_GENERIC_CACHE" = "true" ]; then
     echo ""
@@ -96,7 +96,7 @@ echo "\$TTL 60
                           1H) ; minimum 
                   IN    NS    localhost." > $RPZ_ZONE
 
-curl -s -o services.json https://raw.githubusercontent.com/uklans/cache-domains/master/cache_domains.json
+curl -s -o services.json ${GITHUB_SOURCE}/cache_domains.json
 
 cat services.json | jq -r '.cache_domains[] | .name, .domain_files[]' | while read L; do
   if ! echo ${L} | grep "\.txt" >/dev/null 2>&1 ; then
@@ -141,7 +141,7 @@ cat services.json | jq -r '.cache_domains[] | .name, .domain_files[]' | while re
   else
 	if [ "$CONTINUE" == "true" ]; then
 
-      curl -s -o ${L} https://raw.githubusercontent.com/uklans/cache-domains/master/${L}
+      curl -s -o ${L} ${GITHUB_SOURCE}/${L}
     	## files don't have a newline at the end
     	echo "" >> ${L}
 		cat ${L} | grep -v "^#" | while read URL; do
