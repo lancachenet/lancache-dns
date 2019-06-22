@@ -10,6 +10,13 @@ LANCACHE_DNSDOMAIN="${LANCACHE_DNSDOMAIN:-cache.lancache.net}"
 CACHE_ZONE="${ZONEPATH}$LANCACHE_DNSDOMAIN.db"
 RPZ_ZONE="${ZONEPATH}rpz.db"
 
+reverseip () {       
+    local IFS        
+    IFS=.            
+    set -- $1        
+    echo $4.$3.$2.$1 
+}                    
+
 echo "     _                                      _                       _   "
 echo "    | |                                    | |                     | |  "
 echo " ___| |_ ___  __ _ _ __ ___   ___ __ _  ___| |__   ___   _ __   ___| |_ "
@@ -117,10 +124,11 @@ cat services.json | jq -r '.cache_domains[] | .name, .domain_files[]' | while re
     	fi
 		if [ "x$C_IP" != "x" ]; then
 			echo "Enabling service with ip(s): $C_IP";
+      		echo ";## ${SERVICE}" >> ${RPZ_ZONE}
 			for IP in $C_IP; do
 				echo "$SERVICE IN A $IP;" >> $CACHE_ZONE
+				echo "32.$(reverseip $IP).rpz-client-ip      CNAME rpz-passthru.;" >> ${RPZ_ZONE}
 			done
-      		echo ";## ${SERVICE}" >> ${RPZ_ZONE}
 			CONTINUE=true
 		else
 			echo "Could not find IP for requested service: $SERVICE"
@@ -152,6 +160,13 @@ rm services.json
 echo ""
 echo " --- "
 echo ""
+
+if ! [ -z "${PASSTHRU_IPS}" ]; then                                                     
+  for IP in ${PASSTHRU_IPS}; do                                                       
+    echo ";## Additional RPZ passthroughs"                                          
+    echo "32.$(reverseip $IP).rpz-client-ip      CNAME rpz-passthru." >> ${RPZ_ZONE}
+  done                                                                                
+fi                                                                                      
 
 if ! [ -z "${UPSTREAM_DNS}" ] ; then
   sed -i "s/#ENABLE_UPSTREAM_DNS#//;s/dns_ip/${UPSTREAM_DNS}/" /etc/bind/named.conf.options

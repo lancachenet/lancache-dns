@@ -28,6 +28,15 @@ case $1 in
 	#remove invalid system-err outputs from junit output so circleci can read it
 	sed -i '/<system-err>.*<\/system-err>/d' reports/goss/report.xml
     ;;
+  edit)
+	shift;
+	if [[ "$1" == "keepimage" ]]; then
+		KEEPIMAGE=true
+		shift
+	fi
+	dgoss edit -e USE_GENERIC_CACHE=true -e STEAMCACHE_IP=127.0.0.2 -e LANCACHE_IP=127.0.0.1 $@ lancachenet/lancache-dns:goss-test
+	RESULT=$?
+    ;;
   *)
 	if [[ "$1" == "keepimage" ]]; then
 		KEEPIMAGE=true
