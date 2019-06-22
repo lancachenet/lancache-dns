@@ -9,13 +9,27 @@ USE_GENERIC_CACHE="${USE_GENERIC_CACHE:-false}"
 LANCACHE_DNSDOMAIN="${LANCACHE_DNSDOMAIN:-cache.lancache.net}"
 CACHE_ZONE="${ZONEPATH}$LANCACHE_DNSDOMAIN.db"
 RPZ_ZONE="${ZONEPATH}rpz.db"
-GITHUB_SOURCE=${GITHUB_SOURCE:-${GITHUB_SOURCE}}
+DOMAINS_PATH="/opt/cache-domains"
+
 reverseip () {       
     local IFS        
     IFS=.            
     set -- $1        
     echo $4.$3.$2.$1 
 }                    
+
+export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostCACHE_IDENTIFIERChecking=no"
+pushd ${DOMAINS_PATH}
+if [[ ! -d .git ]]; then
+	git clone ${CACHE_DOMAINS_REPO} .
+fi
+
+if [[ "${NOFETCH:-false}" != "true" ]]; then
+	git remote set-url origin ${CACHE_DOMAINS_REPO}
+	git fetch origin
+	git reset --hard origin/master
+fi
+popd
 
 echo "     _                                      _                       _   "
 echo "    | |                                    | |                     | |  "
@@ -34,18 +48,18 @@ echo ""
 
 
 if [ "$USE_GENERIC_CACHE" = "true" ]; then
-  if [ -z ${LANCACHE_IP} ]; then
+  if [ -z "${LANCACHE_IP}" ]; then
     echo "If you are using USE_GENERIC_CACHE then you must set LANCACHE_IP"
     exit 1
   fi
 else
-  if ! [ -z ${LANCACHE_IP} ]; then
+  if ! [ -z "${LANCACHE_IP}" ]; then
     echo "If you are using LANCACHE_IP then you must set USE_GENERIC_CACHE=true"
     exit 1
   fi
 fi
 
-echo "Bootstrapping DNS from ${GITHUB_SOURCE}"
+echo "Bootstrapping DNS from ${CACHE_DOMAINS_REPO}"
 
 if [ "$USE_GENERIC_CACHE" = "true" ]; then
     echo ""
@@ -96,7 +110,7 @@ echo "\$TTL 60
                           1H) ; minimum 
                   IN    NS    localhost." > $RPZ_ZONE
 
-curl -s -o services.json ${GITHUB_SOURCE}/cache_domains.json
+cp ${DOMAINS_PATH}/cache_domains.json ./services.json
 
 cat services.json | jq -r '.cache_domains[] | .name, .domain_files[]' | while read L; do
   if ! echo ${L} | grep "\.txt" >/dev/null 2>&1 ; then
@@ -141,7 +155,7 @@ cat services.json | jq -r '.cache_domains[] | .name, .domain_files[]' | while re
   else
 	if [ "$CONTINUE" == "true" ]; then
 
-      curl -s -o ${L} ${GITHUB_SOURCE}/${L}
+        cp ${DOMAINS_PATH}/${L} ./${L}
     	## files don't have a newline at the end
     	echo "" >> ${L}
 		cat ${L} | grep -v "^#" | while read URL; do
