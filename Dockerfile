@@ -1,13 +1,8 @@
-FROM alpine:latest
+FROM lancachenet/ubuntu:latest
 MAINTAINER LanCache.Net Team <team@lancache.net>
 
 ENV STEAMCACHE_DNS_VERSION=1 ENABLE_DNSSEC_VALIDATION=false LANCACHE_DNSDOMAIN=cache.lancache.net
-
-RUN	apk update && apk add			\
-		bind	\
-		bash	\
-		jq		\
-		curl	
+RUN apt-get update && apt-get install -y bind jq curl
 
 COPY	overlay/ /
 
