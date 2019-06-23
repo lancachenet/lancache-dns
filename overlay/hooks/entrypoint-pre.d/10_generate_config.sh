@@ -18,7 +18,7 @@ reverseip () {
     echo $4.$3.$2.$1 
 }                    
 
-export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostCACHE_IDENTIFIERChecking=no"
+export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 pushd ${DOMAINS_PATH}
 if [[ ! -d .git ]]; then
 	git clone ${CACHE_DOMAINS_REPO} .
