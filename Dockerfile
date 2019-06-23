@@ -7,7 +7,6 @@ RUN apt-get update && apt-get install -y bind9 jq curl dnsutils git
 COPY overlay/ /
 
 RUN	mkdir -p /var/cache/bind /var/log/named		\
-	&& chmod 755 /scripts/*				\
 	&& chown bind:bind /var/cache/bind /var/log/named
 
 RUN git clone --depth=1 https://github.com/uklans/cache-domains/ /opt/cache-domains
