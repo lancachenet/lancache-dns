@@ -10,6 +10,7 @@ LANCACHE_DNSDOMAIN="${LANCACHE_DNSDOMAIN:-cache.lancache.net}"
 CACHE_ZONE="${ZONEPATH}$LANCACHE_DNSDOMAIN.db"
 RPZ_ZONE="${ZONEPATH}rpz.db"
 DOMAINS_PATH="/opt/cache-domains"
+UPSTREAM_DNS=${UPSTREAM_DNS:-8.8.8.8}
 
 reverseip () {       
     local IFS        
