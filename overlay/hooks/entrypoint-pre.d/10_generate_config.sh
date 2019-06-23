@@ -9,6 +9,28 @@ USE_GENERIC_CACHE="${USE_GENERIC_CACHE:-false}"
 LANCACHE_DNSDOMAIN="${LANCACHE_DNSDOMAIN:-cache.lancache.net}"
 CACHE_ZONE="${ZONEPATH}$LANCACHE_DNSDOMAIN.db"
 RPZ_ZONE="${ZONEPATH}rpz.db"
+DOMAINS_PATH="/opt/cache-domains"
+UPSTREAM_DNS=${UPSTREAM_DNS:-8.8.8.8}
+
+reverseip () {       
+    local IFS        
+    IFS=.            
+    set -- $1        
+    echo $4.$3.$2.$1 
+}                    
+
+export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+pushd ${DOMAINS_PATH}
+if [[ ! -d .git ]]; then
+	git clone ${CACHE_DOMAINS_REPO} .
+fi
+
+if [[ "${NOFETCH:-false}" != "true" ]]; then
+	git remote set-url origin ${CACHE_DOMAINS_REPO}
+	git fetch origin
+	git reset --hard origin/master
+fi
+popd
 
 echo "     _                                      _                       _   "
 echo "    | |                                    | |                     | |  "
@@ -27,18 +49,18 @@ echo ""
 
 
 if [ "$USE_GENERIC_CACHE" = "true" ]; then
-  if [ -z ${LANCACHE_IP} ]; then
+  if [ -z "${LANCACHE_IP}" ]; then
     echo "If you are using USE_GENERIC_CACHE then you must set LANCACHE_IP"
     exit 1
   fi
 else
-  if ! [ -z ${LANCACHE_IP} ]; then
+  if ! [ -z "${LANCACHE_IP}" ]; then
     echo "If you are using LANCACHE_IP then you must set USE_GENERIC_CACHE=true"
     exit 1
   fi
 fi
 
-echo "Bootstrapping DNS from https://github.com/uklans/cache-domains"
+echo "Bootstrapping DNS from ${CACHE_DOMAINS_REPO}"
 
 if [ "$USE_GENERIC_CACHE" = "true" ]; then
     echo ""
@@ -89,7 +111,7 @@ echo "\$TTL 60
                           1H) ; minimum 
                   IN    NS    localhost." > $RPZ_ZONE
 
-curl -s -o services.json https://raw.githubusercontent.com/uklans/cache-domains/master/cache_domains.json
+cp ${DOMAINS_PATH}/cache_domains.json ./services.json
 
 cat services.json | jq -r '.cache_domains[] | .name, .domain_files[]' | while read L; do
   if ! echo ${L} | grep "\.txt" >/dev/null 2>&1 ; then
@@ -117,10 +139,11 @@ cat services.json | jq -r '.cache_domains[] | .name, .domain_files[]' | while re
     	fi
 		if [ "x$C_IP" != "x" ]; then
 			echo "Enabling service with ip(s): $C_IP";
+      		echo ";## ${SERVICE}" >> ${RPZ_ZONE}
 			for IP in $C_IP; do
 				echo "$SERVICE IN A $IP;" >> $CACHE_ZONE
+				echo "32.$(reverseip $IP).rpz-client-ip      CNAME rpz-passthru.;" >> ${RPZ_ZONE}
 			done
-      		echo ";## ${SERVICE}" >> ${RPZ_ZONE}
 			CONTINUE=true
 		else
 			echo "Could not find IP for requested service: $SERVICE"
@@ -133,7 +156,7 @@ cat services.json | jq -r '.cache_domains[] | .name, .domain_files[]' | while re
   else
 	if [ "$CONTINUE" == "true" ]; then
 
-      curl -s -o ${L} https://raw.githubusercontent.com/uklans/cache-domains/master/${L}
+        cp ${DOMAINS_PATH}/${L} ./${L}
     	## files don't have a newline at the end
     	echo "" >> ${L}
 		cat ${L} | grep -v "^#" | while read URL; do
@@ -153,6 +176,13 @@ echo ""
 echo " --- "
 echo ""
 
+if ! [ -z "${PASSTHRU_IPS}" ]; then                                                     
+  for IP in ${PASSTHRU_IPS}; do                                                       
+    echo ";## Additional RPZ passthroughs"                                          
+    echo "32.$(reverseip $IP).rpz-client-ip      CNAME rpz-passthru." >> ${RPZ_ZONE}
+  done                                                                                
+fi                                                                                      
+
 if ! [ -z "${UPSTREAM_DNS}" ] ; then
   sed -i "s/#ENABLE_UPSTREAM_DNS#//;s/dns_ip/${UPSTREAM_DNS}/" /etc/bind/named.conf.options
 fi
@@ -164,25 +194,3 @@ fi
 
 echo "finished bootstrapping."
 
-echo ""
-echo " --- "
-echo ""
-
-echo "checking Bind9 config"
-
-if ! /usr/sbin/named-checkconf /etc/bind/named.conf ; then
-    echo "Problem with Bind9 configuration - Bailing" >&2
-    exit 1
-fi
-
-echo "Running Bind9"
-
-tail -F /var/log/named/general.log /var/log/named/default.log /var/log/named/queries.log  &
-
-/usr/sbin/named -u named -c /etc/bind/named.conf -f
-BEC=$?
-
-if ! [ $BEC = 0 ]; then
-    echo "Bind9 exited with ${BEC}"
-    exit ${BEC} #exit with the same exit code as bind9
-fi

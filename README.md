@@ -67,6 +67,15 @@ Should you wish a cache server to have multiple IP addresses (for example a mono
 Follow the instructions in the Docker documentation to run the container at startup.
 [Documentation](https://docs.docker.com/config/containers/start-containers-automatically/)
 
+## Custom Forks/Branches
+
+If you have your own fork (or branch) forked from [uklans/cache-domains](https://github.com/uklans/cache-domains) and would like to use your own for testing purposes (before pushing it to the main branch) or cache from unofficially supported domains, then declare your username with `GITHUB_USERNAME` and your branch with `GITHUB_BRANCH` as so, for example:
+```
+docker run --name lancache-dns -p 10.0.0.2:53:53/udp -e GITHUB_SOURCE="example-username/cache-domains/example-branch" lancache/lancache-dns:latest
+```
+giving that it would download the services and cache_domains.json from `https://github.com/example-username/uklans/example-branch` instead of the default, and your new service, as a variable, would be `<SERVICE_NAME>CACHE_IP` from `<SERVICE_NAME>.txt`
+
+
 ## Further information
 
 More information can be found at the [LanCache github page](http://lancache.net)

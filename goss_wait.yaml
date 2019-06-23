@@ -1,0 +1,8 @@
+process:
+  supervisord:
+    running: true
+  named:
+    running: true
+port:
+  tcp:53:
+    listening: true
