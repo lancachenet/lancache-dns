@@ -75,7 +75,7 @@ docker run --name lancache-dns -p 10.0.0.2:53:53/udp -e CACHE_DOMAINS_REPO="http
 ```
 which would use the cache domains from https://github.com/your-username/cache-domains.git
 
-Note that the Master branch of whatever repoistory is specified will be used.
+Note that the Master branch of whatever repository is specified will be used.
 
 ## Further information
 
