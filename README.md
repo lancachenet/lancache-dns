@@ -69,12 +69,13 @@ Follow the instructions in the Docker documentation to run the container at star
 
 ## Custom Forks/Branches
 
-If you have your own fork (or branch) forked from [uklans/cache-domains](https://github.com/uklans/cache-domains) and would like to use your own for testing purposes (before pushing it to the main branch) or cache from unofficially supported domains, then declare your username with `GITHUB_USERNAME` and your branch with `GITHUB_BRANCH` as so, for example:
+If you have your own fork (or branch) forked from [uklans/cache-domains](https://github.com/uklans/cache-domains) and would like to use your own for testing purposes (before pushing it to the main branch) or cache from unofficially supported domains, then declare it with `CACHE_DOMAINS_REPO` including the full .git URL for your fork, for example:
 ```
-docker run --name lancache-dns -p 10.0.0.2:53:53/udp -e GITHUB_SOURCE="example-username/cache-domains/example-branch" lancache/lancache-dns:latest
+docker run --name lancache-dns -p 10.0.0.2:53:53/udp -e CACHE_DOMAINS_REPO="https://github.com/your-username/cache-domains.git" lancache/lancache-dns:latest
 ```
-giving that it would download the services and cache_domains.json from `https://github.com/example-username/uklans/example-branch` instead of the default, and your new service, as a variable, would be `<SERVICE_NAME>CACHE_IP` from `<SERVICE_NAME>.txt`
+which would use the cache domains from https://github.com/your-username/cache-domains.git
 
+Note that the Master branch of whatever repoistory is specified will be used.
 
 ## Further information
 
