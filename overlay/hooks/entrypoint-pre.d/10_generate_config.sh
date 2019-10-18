@@ -12,11 +12,30 @@ RPZ_ZONE="${ZONEPATH}rpz.db"
 DOMAINS_PATH="/opt/cache-domains"
 UPSTREAM_DNS=${UPSTREAM_DNS:-8.8.8.8}
 
-reverseip () {       
-    local IFS        
-    IFS=.            
-    set -- $1        
-    echo $4.$3.$2.$1 
+reverse4name () {
+    local IFS
+    IFS=.
+    set -- $1
+    echo "32.$4.$3.$2.$1.rpz-client-ip"
+}
+
+reverse6name () {
+    local IFS
+    IFS=:
+    set -- $1
+
+    for i in "$@"
+    do
+        if [ -z "$i" ] && [ $zz ]; then continue; fi
+        if [ -z "$i" ]; then i="zz"; zz=true; fi
+        if [ -z "$addr" ]; then addr=$i; else addr="$i.$addr"; fi                 
+    done
+
+    echo "128.$addr.rpz-client-ip"
+}
+
+isipv6 () {
+    [[ "$1" == *":"* ]]    
 }                    
 
 export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
@@ -141,8 +160,14 @@ cat services.json | jq -r '.cache_domains[] | .name, .domain_files[]' | while re
 			echo "Enabling service with ip(s): $C_IP";
       		echo ";## ${SERVICE}" >> ${RPZ_ZONE}
 			for IP in $C_IP; do
-				echo "$SERVICE IN A $IP;" >> $CACHE_ZONE
-				echo "32.$(reverseip $IP).rpz-client-ip      CNAME rpz-passthru.;" >> ${RPZ_ZONE}
+				if isipv6 "$IP"; 
+				then
+					echo "$SERVICE IN AAAA $IP;" >> $CACHE_ZONE
+					echo "$(reverse6name $IP)      CNAME rpz-passthru.;" >> ${RPZ_ZONE}
+				else
+					echo "$SERVICE IN A $IP;" >> $CACHE_ZONE
+					echo "$(reverse4name $IP)      CNAME rpz-passthru.;" >> ${RPZ_ZONE}					
+				fi				
 			done
 			CONTINUE=true
 		else
@@ -177,9 +202,12 @@ echo " --- "
 echo ""
 
 if ! [ -z "${PASSTHRU_IPS}" ]; then                                                     
-  for IP in ${PASSTHRU_IPS}; do                                                       
-    echo ";## Additional RPZ passthroughs"                                          
-    echo "32.$(reverseip $IP).rpz-client-ip      CNAME rpz-passthru." >> ${RPZ_ZONE}
+  for IP in ${PASSTHRU_IPS}; do     
+	echo ";## Additional RPZ passthroughs"
+	if isipv6 "$IP"; 
+    then echo "$(reverse6name $IP)      CNAME rpz-passthru." >> ${RPZ_ZONE}  
+    else echo "$(reverse4name $IP)      CNAME rpz-passthru." >> ${RPZ_ZONE}        
+    fi
   done                                                                                
 fi                                                                                      
 
