@@ -42,7 +42,12 @@ echo ""
 echo ""
 if ! [ -z "${UPSTREAM_DNS}" ] ; then
   echo "configuring /etc/resolv.conf to stop from looping to ourself"
-  echo "nameserver ${UPSTREAM_DNS}" > /etc/resolv.conf
+  echo "# Lancache dns config" > /etc/resolv.conf
+  for ns in $(echo $UPSTREAM_DNS | sed "s/[;]/ /g")
+  do
+      # call your procedure/other scripts here below
+      echo "nameserver $ns" >> /etc/resolv.conf
+  done
 fi
 echo ""
 
