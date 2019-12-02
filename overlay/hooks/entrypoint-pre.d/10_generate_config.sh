@@ -28,7 +28,7 @@ fi
 if [[ "${NOFETCH:-false}" != "true" ]]; then
 	git remote set-url origin ${CACHE_DOMAINS_REPO}
 	git fetch origin
-	git reset --hard origin/master
+	git reset --hard origin/${CACHE_DOMAINS_BRANCH}
 fi
 popd
 
