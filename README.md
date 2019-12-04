@@ -62,6 +62,17 @@ you have a DNS server on 1.2.3.4, the command argument would be `-e UPSTREAM_DNS
 
 Should you wish a cache server to have multiple IP addresses (for example a monolithic instance tuned for steam) you may specify them as a space delimited list within quotes for example: `-e STEAMCACHE_IP="1.2.3.4 5.6.7.8"`
 
+## Custom DNS Records
+
+If you would like to add custom records to your DNS server (for example additional services, ad-blocking, etc) you can do so by adding records to the `/etc/bind/cache/custom.db` file within the container. The easiest way to do this is, upon container creation, to bind a local file to a container file. To do that, the command argument would be `-v /<host path here>/custom.db:/etc/bind/cache/custom.db`
+
+Here is an example of what that `custom.db` could look like:
+```
+notes.<your domain>        A       10.0.0.230
+games.<your domain>        A       10.0.0.230
+files.<your domain>        A       10.0.0.231
+```
+
 ## Running on Startup
 
 Follow the instructions in the Docker documentation to run the container at startup.
