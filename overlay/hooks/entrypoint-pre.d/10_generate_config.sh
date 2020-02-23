@@ -26,9 +26,13 @@ if [[ ! -d .git ]]; then
 fi
 
 if [[ "${NOFETCH:-false}" != "true" ]]; then
+	# Disable error checking whilst we attempt to get latest
+	set +e
 	git remote set-url origin ${CACHE_DOMAINS_REPO}
 	git fetch origin
 	git reset --hard origin/${CACHE_DOMAINS_BRANCH}
+	# Reenable error checking
+	set -e
 fi
 popd
 
