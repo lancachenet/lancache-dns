@@ -19,14 +19,6 @@ reverseip () {
     echo $4.$3.$2.$1 
 }                    
 
-echo "     _                                      _                       _   "
-echo "    | |                                    | |                     | |  "
-echo " ___| |_ ___  __ _ _ __ ___   ___ __ _  ___| |__   ___   _ __   ___| |_ "
-echo "/ __| __/ _ \\/ _\` | '_ \` _ \\ / __/ _\` |/ __| '_ \\ / _ \\ | '_ \\ / _ \\ __|"
-echo "\\__ \\ ||  __/ (_| | | | | | | (_| (_| | (__| | | |  __/_| | | |  __/ |_ "
-echo "|___/\\__\\___|\\__,_|_| |_| |_|\\___\\__,_|\\___|_| |_|\\___(_)_| |_|\\___|\\__|"
-echo ""
-echo ""
 if ! [ -z "${UPSTREAM_DNS}" ] ; then
   echo "configuring /etc/resolv.conf to stop from looping to ourself"
   echo "# Lancache dns config" > /etc/resolv.conf
