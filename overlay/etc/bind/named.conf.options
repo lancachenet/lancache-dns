@@ -7,9 +7,10 @@ options {
         allow-query-cache { any; };
         listen-on { any; };
         listen-on-v6 { any; };
-		response-policy { zone "rpz"; };
-		rrset-order { order cyclic; };
+	response-policy { zone "rpz"; } qname-wait-recurse no;
+	rrset-order { order cyclic; };
         #ENABLE_UPSTREAM_DNS#forwarders { dns_ip; };
+        forward only;
 };
 
 logging {
