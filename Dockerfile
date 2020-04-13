@@ -1,8 +1,8 @@
 FROM lancachenet/ubuntu:latest
 MAINTAINER LanCache.Net Team <team@lancache.net>
 
-ENV STEAMCACHE_DNS_VERSION=1 ENABLE_DNSSEC_VALIDATION=false LANCACHE_DNSDOMAIN=cache.lancache.net CACHE_DOMAINS_REPO=https://github.com/uklans/cache-domains.git CACHE_DOMAINS_BRANCH=master UPSTREAM_DNS=8.8.8.8
-RUN apt-get update && apt-get install -y bind9 jq curl dnsutils git
+ENV STEAMCACHE_DNS_VERSION=1 ENABLE_DNSSEC_VALIDATION=false LANCACHE_DNSDOMAIN=cache.lancache.net CACHE_DOMAINS_REPO=https://github.com/uklans/cache-domains.git CACHE_DOMAINS_BRANCH=master UPSTREAM_DNS=8.8.8.8 ENABLE_V6=false
+RUN apt-get update && apt-get install -y bind9 jq curl dnsutils git sipcalc
 
 COPY overlay/ /
 

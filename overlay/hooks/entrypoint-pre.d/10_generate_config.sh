@@ -12,20 +12,28 @@ RPZ_ZONE="${ZONEPATH}rpz.db"
 DOMAINS_PATH="/opt/cache-domains"
 UPSTREAM_DNS=${UPSTREAM_DNS:-8.8.8.8}
 
-reverseip () {       
-    local IFS        
-    IFS=.            
-    set -- $1        
-    echo $4.$3.$2.$1 
-}                    
+reverseip () {
+  local IFS
+  IFS=.
+  set -- $1
+  echo $4.$3.$2.$1 
+}
+
+reverseipv6 () {
+  data=$(sipcalc $1  | grep Exp | cut -d'-' -f 2 | tr -d ' ')
+  local IFS
+  IFS=:
+  set -- $data
+  echo $8.$7.$6.$5.$4.$3.$2.$1 
+}
 
 if ! [ -z "${UPSTREAM_DNS}" ] ; then
   echo "configuring /etc/resolv.conf to stop from looping to ourself"
   echo "# Lancache dns config" > /etc/resolv.conf
   for ns in $(echo $UPSTREAM_DNS | sed "s/[;]/ /g")
   do
-      # call your procedure/other scripts here below
-      echo "nameserver $ns" >> /etc/resolv.conf
+    # call your procedure/other scripts here below
+    echo "nameserver $ns" >> /etc/resolv.conf
   done
 fi
 echo ""
@@ -54,9 +62,15 @@ if [ "$USE_GENERIC_CACHE" = "true" ]; then
     echo "If you are using USE_GENERIC_CACHE then you must set LANCACHE_IP"
     exit 1
   fi
+  if [ "${ENABLE_V6}" = true ]; then
+    if [ -z "${LANCACHE_IPV6}" ]; then
+      echo "If you are using USE_GENERIC_CACHE with ENABLE_V6 then you must also set LANCACHE_IPV6"
+      exit 1
+    fi
+  fi
 else
-  if ! [ -z "${LANCACHE_IP}" ]; then
-    echo "If you are using LANCACHE_IP then you must set USE_GENERIC_CACHE=true"
+  if ! [ -z "${LANCACHE_IP}${LANCACHE_IPV6}" ]; then
+    echo "If you are using LANCACHE_IP or LANCACHE_IPV6 then you must set USE_GENERIC_CACHE=true"
     exit 1
   fi
 fi
@@ -65,7 +79,13 @@ if [ "$USE_GENERIC_CACHE" = "true" ]; then
     echo ""
     echo "----------------------------------------------------------------------"
     echo "Using Generic Server: ${LANCACHE_IP}"
+    if [ "${ENABLE_V6}" = true ]; then
+      echo "Using Generic IPv6 Server: ${LANCACHE_IPV6}"
+    fi
     echo "Make sure you are using a monolithic cache or load balancer at ${LANCACHE_IP}"
+    if [ "${ENABLE_V6}" = true ]; then
+      echo "And at ${LANCACHE_IPV6}"
+    fi
     echo "----------------------------------------------------------------------"
     echo ""
 fi
@@ -73,7 +93,7 @@ fi
 rm -f ${CACHECONF}
 touch ${CACHECONF}
 
-#Add the rpz zones to the cache.conf
+# Add the rpz zones to the cache.conf
 echo "
 	zone \"$LANCACHE_DNSDOMAIN\" {
 		type master;
@@ -85,7 +105,7 @@ echo "
       allow-query { none; };
     };" > ${CACHECONF}
 
-#Generate the SOA for cache.lancache.net
+# Generate the SOA for cache.lancache.net
 
 echo "\$ORIGIN $LANCACHE_DNSDOMAIN. 
 \$TTL    600
@@ -99,7 +119,7 @@ echo "\$ORIGIN $LANCACHE_DNSDOMAIN.
 
 " > $CACHE_ZONE
 
-#Generate the RPZ zone file
+# Generate the RPZ zone file
 
 echo "\$TTL 60
 @            IN    SOA  localhost. root.localhost.  (
@@ -117,57 +137,116 @@ cat services.json | jq -r '.cache_domains[] | .name, .domain_files[]' | while re
     SERVICE=${L}
     # Uppercase service, strip non-alphanumeric characters and replace with underscores
     SERVICEUC=`echo ${L} | sed 's/[^a-z0-9]\+/_/g' | tr [:lower:] [:upper:]`
-	echo "Processing service: $SERVICE"
-	CONTINUE=false
-	SERVICE_ENABLED=false
-	if [ "$USE_GENERIC_CACHE" = "true" ]; then
-    	if ! env | grep "DISABLE_${SERVICEUC}=true" >/dev/null 2>&1; then
-			SERVICE_ENABLED=true	
-		fi
-	else
-		echo "testing for presence of ${SERVICEUC}CACHE_IP"
-    	if env | grep "${SERVICEUC}CACHE_IP" >/dev/null 2>&1; then
-			SERVICE_ENABLED=true
-		fi
-	fi
-	if [ "$SERVICE_ENABLED" == "true" ]; then
-    	if env | grep "${SERVICEUC}CACHE_IP" >/dev/null 2>&1; then
-    		C_IP=$(env | grep "${SERVICEUC}CACHE_IP=" | sed 's/.*=//')
-    	else
-    		C_IP=${LANCACHE_IP}
-    	fi
-		if [ "x$C_IP" != "x" ]; then
-			echo "Enabling service with ip(s): $C_IP";
-      		echo ";## ${SERVICE}" >> ${RPZ_ZONE}
-			for IP in $C_IP; do
-				echo "$SERVICE IN A $IP;" >> $CACHE_ZONE
-				echo "32.$(reverseip $IP).rpz-client-ip      CNAME rpz-passthru.;" >> ${RPZ_ZONE}
-			done
-			CONTINUE=true
-		else
-			echo "Could not find IP for requested service: $SERVICE"
-			exit 1
-		fi
-	else
-		echo "Skipping $SERVICE"
-	fi
-
+    echo "Processing service: $SERVICE"
+    CONTINUE=false
+    SERVICE_ENABLED=false
+    if [ "$USE_GENERIC_CACHE" = "true" ]; then
+      if ! env | grep "DISABLE_${SERVICEUC}=true" >/dev/null 2>&1; then
+        SERVICE_ENABLED=true  
+      fi
+    else
+      echo "testing for presence of ${SERVICEUC}CACHE_IP"
+      if env | grep "${SERVICEUC}CACHE_IP" >/dev/null 2>&1; then
+        SERVICE_ENABLED=true
+      fi
+    fi
+    if [ "$SERVICE_ENABLED" == "true" ]; then
+      if env | grep "${SERVICEUC}CACHE_IP" >/dev/null 2>&1; then
+        C_IP=$(env | grep "${SERVICEUC}CACHE_IP=" | sed 's/.*=//')
+      else
+        C_IP=${LANCACHE_IP}
+      fi
+    if [ "x$C_IP" != "x" ]; then
+      echo "Enabling service with ip(s): $C_IP";
+      echo ";## ${SERVICE}" >> ${RPZ_ZONE}
+      for IP in $C_IP; do
+        echo "$SERVICE IN A $IP;" >> $CACHE_ZONE
+        echo "32.$(reverseip $IP).rpz-client-ip      CNAME rpz-passthru.;" >> ${RPZ_ZONE}
+      done
+      CONTINUE=true
+    else
+      echo "Could not find IP for requested service: $SERVICE"
+      exit 1
+    fi
+    else
+      echo "Skipping $SERVICE"
+    fi
   else
-	if [ "$CONTINUE" == "true" ]; then
-
-        cp ${DOMAINS_PATH}/${L} ./${L}
-    	## files don't have a newline at the end
-    	echo "" >> ${L}
-		cat ${L} | grep -v "^#" | while read URL; do
-      		if [ "x${URL}" != "x" ] ; then
-				#RPZ entries do NOT need a trailing . on the rpz domain, but do for the redirect host
-				echo "${URL} IN CNAME $SERVICE.$LANCACHE_DNSDOMAIN.;" >> $RPZ_ZONE;
-      		fi
-    	done
+    if [ "$CONTINUE" == "true" ]; then
+      cp ${DOMAINS_PATH}/${L} ./${L}
+      ## files don't have a newline at the end
+      echo "" >> ${L}
+      cat ${L} | grep -v "^#" | while read URL; do
+        if [ "x${URL}" != "x" ] ; then
+          # RPZ entries do NOT need a trailing . on the rpz domain, but do for the redirect host
+          echo "${URL} IN CNAME $SERVICE.$LANCACHE_DNSDOMAIN.;" >> $RPZ_ZONE;
+        fi
+      done
       rm ${L}
     fi
   fi
 done
+
+
+if [ "${ENABLE_V6}" == true ]; then
+  # Do it again for v6
+  cat services.json | jq -r '.cache_domains[] | .name, .domain_files[]' | while read L; do
+    if ! echo ${L} | grep "\.txt" >/dev/null 2>&1 ; then
+      SERVICE=${L}
+      # Uppercase service, strip non-alphanumeric characters and replace with underscores
+      SERVICEUC=`echo ${L} | sed 's/[^a-z0-9]\+/_/g' | tr [:lower:] [:upper:]`
+      echo "Processing service: $SERVICE"
+      CONTINUE=false
+      SERVICE_ENABLED=false
+      if [ "$USE_GENERIC_CACHE" = "true" ]; then
+        if ! env | grep "DISABLE_${SERVICEUC}=true" >/dev/null 2>&1; then
+          SERVICE_ENABLED=true  
+        fi
+      else
+        echo "testing for presence of ${SERVICEUC}CACHE_IPV6"
+        if env | grep "${SERVICEUC}CACHE_IPV6" >/dev/null 2>&1; then
+          SERVICE_ENABLED=true
+        fi
+      fi
+      if [ "$SERVICE_ENABLED" == "true" ]; then
+        if env | grep "${SERVICEUC}CACHE_IPV6" >/dev/null 2>&1; then
+          C_IP=$(env | grep "${SERVICEUC}CACHE_IP=" | sed 's/.*=//')
+        else
+          C_IP=${LANCACHE_IPV6}
+        fi
+      if [ "x$C_IP" != "x" ]; then
+        echo "Enabling service with ip(s): $C_IP";
+        echo ";## ${SERVICE}" >> ${RPZ_ZONE}
+        for IP in $C_IP; do
+          echo "$SERVICE IN AAAA $IP;" >> $CACHE_ZONE
+          echo "128.$(reverseipv6 $IP).rpz-client-ip      CNAME rpz-passthru.;" >> ${RPZ_ZONE}
+        done
+        CONTINUE=true
+      else
+        echo "Could not find IP for requested service: $SERVICE"
+        exit 1
+      fi
+      else
+        echo "Skipping $SERVICE"
+      fi
+    else
+      # Not sure if this is needed for v6
+      if [ "$CONTINUE" == "true" ]; then
+        cp ${DOMAINS_PATH}/${L} ./${L}
+        ## files don't have a newline at the end
+        echo "" >> ${L}
+        cat ${L} | grep -v "^#" | while read URL; do
+          if [ "x${URL}" != "x" ] ; then
+            # RPZ entries do NOT need a trailing . on the rpz domain, but do for the redirect host
+            echo "${URL} IN CNAME $SERVICE.$LANCACHE_DNSDOMAIN.;" >> $RPZ_ZONE;
+          fi
+        done
+        rm ${L}
+      fi
+    fi
+  done
+
+fi
 
 rm services.json
 
@@ -175,12 +254,12 @@ echo ""
 echo " --- "
 echo ""
 
-if ! [ -z "${PASSTHRU_IPS}" ]; then                                                     
-  for IP in ${PASSTHRU_IPS}; do                                                       
-    echo ";## Additional RPZ passthroughs"                                          
+if ! [ -z "${PASSTHRU_IPS}" ]; then
+  for IP in ${PASSTHRU_IPS}; do
+    echo ";## Additional RPZ passthroughs"
     echo "32.$(reverseip $IP).rpz-client-ip      CNAME rpz-passthru." >> ${RPZ_ZONE}
-  done                                                                                
-fi                                                                                      
+  done
+fi
 
 if ! [ -z "${UPSTREAM_DNS}" ] ; then
   sed -i "s/#ENABLE_UPSTREAM_DNS#//;s/dns_ip/${UPSTREAM_DNS}/" /etc/bind/named.conf.options
