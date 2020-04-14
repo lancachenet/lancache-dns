@@ -194,13 +194,13 @@ if [ "${ENABLE_DNSSEC_VALIDATION}" = true ] ; then
 fi
 
 if ! [ -z "${MAX_DNSCACHE_TTL}" ] ; then
-  sed -i "s/#ENABLE_MAX_DNSCACHE_TTL#/max-cache-ttl ${MAX_DNSCACHE_TTL}/" /etc/bind/named.conf.options
+  sed -i "s/#ENABLE_MAX_DNSCACHE_TTL#/max-cache-ttl ${MAX_DNSCACHE_TTL};/" /etc/bind/named.conf.options
 else
   sed -i "s/#ENABLE_MAX_DNSCACHE_TTL#//" /etc/bind/named.conf.options
 fi
 
 if ! [ -z "${MAX_DNSNCACHE_TTL}" ] ; then
-  sed -i "s/#ENABLE_MAX_DNSNCACHE_TTL#/max-cache-ttl ${MAX_DNSNCACHE_TTL}/" /etc/bind/named.conf.options
+  sed -i "s/#ENABLE_MAX_DNSNCACHE_TTL#/max-cache-ttl ${MAX_DNSNCACHE_TTL};/" /etc/bind/named.conf.options
 else
   sed -i "s/#ENABLE_MAX_DNSNCACHE_TTL#//" /etc/bind/named.conf.options
 fi
