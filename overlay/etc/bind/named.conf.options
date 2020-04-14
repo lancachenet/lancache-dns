@@ -7,6 +7,8 @@ options {
         allow-query-cache { any; };
         listen-on { any; };
         listen-on-v6 { any; };
+        #ENABLE_MAX_DNSCACHE_TTL#
+        #ENABLE_MAX_DNSNCACHE_TTL#
 	
 	# Permit RFC1918 PTR lookups to be recursed upstream
 	empty-zones-enable no;
