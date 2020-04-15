@@ -200,7 +200,7 @@ else
 fi
 
 if ! [ -z "${MAX_DNSNCACHE_TTL}" ] ; then
-  sed -i "s/#ENABLE_MAX_DNSNCACHE_TTL#/max-cache-ttl ${MAX_DNSNCACHE_TTL};/" /etc/bind/named.conf.options
+  sed -i "s/#ENABLE_MAX_DNSNCACHE_TTL#/max-ncache-ttl ${MAX_DNSNCACHE_TTL};/" /etc/bind/named.conf.options
 else
   sed -i "s/#ENABLE_MAX_DNSNCACHE_TTL#//" /etc/bind/named.conf.options
 fi
