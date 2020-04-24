@@ -198,7 +198,7 @@ if ! [ -z "${MAX_DNSCACHE_TTL}" ] ; then
   if [ [ ! [ "${FORWARD_ONLY}" = true ] ] && [ ${MAX_DNSCACHE_TTL} == 0 ] ] ; then
     sed -i "s/#ENABLE_MAX_DNSCACHE_TTL#/max-cache-ttl ${MAX_DNSCACHE_TTL};/" /etc/bind/named.conf.options
   else
-    sed -i "s/#ENABLE_MAX_DNSCACHE_TTL#/max-cache-ttl 5;/" /etc/bind/named.conf.options #Enforce a minimum value if FORWARD_ONLY is not true.
+    sed -i "s/#ENABLE_MAX_DNSCACHE_TTL#/max-cache-ttl 1;/" /etc/bind/named.conf.options #Enforce a minimum value if FORWARD_ONLY is not true.
   fi
 else
   sed -i "s/#ENABLE_MAX_DNSCACHE_TTL#//" /etc/bind/named.conf.options
