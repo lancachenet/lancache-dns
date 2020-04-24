@@ -212,6 +212,8 @@ fi
 
 if [ "${FORWARD_ONLY}" = true ] ; then
   sed -i "s/#FORWARD_ONLY#/forward only;/" /etc/bind/named.conf.options
+else
+  sed -i "s/#FORWARD_ONLY#//" /etc/bind/named.conf.options
 fi
 
 echo "finished bootstrapping."
