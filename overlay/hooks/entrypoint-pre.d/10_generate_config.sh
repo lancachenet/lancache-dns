@@ -13,6 +13,7 @@ DOMAINS_PATH="/opt/cache-domains"
 UPSTREAM_DNS=${UPSTREAM_DNS:-8.8.8.8}
 MAX_DNSCACHE_TTL=${MAX_DNSCACHE_TTL}
 MAX_DNSNCACHE_TTL=${MAX_DNSNCACHE_TTL}
+FORWARD_ONLY=${FORWARD_ONLY}
 
 reverseip () {       
     local IFS        
@@ -194,7 +195,11 @@ if [ "${ENABLE_DNSSEC_VALIDATION}" = true ] ; then
 fi
 
 if ! [ -z "${MAX_DNSCACHE_TTL}" ] ; then
-  sed -i "s/#ENABLE_MAX_DNSCACHE_TTL#/max-cache-ttl ${MAX_DNSCACHE_TTL};/" /etc/bind/named.conf.options
+  if [ [ ! [ "${FORWARD_ONLY}" = true ] ] && [ ${MAX_DNSCACHE_TTL} == 0 ] ] ; then
+    sed -i "s/#ENABLE_MAX_DNSCACHE_TTL#/max-cache-ttl ${MAX_DNSCACHE_TTL};/" /etc/bind/named.conf.options
+  else
+    sed -i "s/#ENABLE_MAX_DNSCACHE_TTL#/max-cache-ttl 1;/" /etc/bind/named.conf.options #Enforce a minimum value if FORWARD_ONLY is not true.
+  fi
 else
   sed -i "s/#ENABLE_MAX_DNSCACHE_TTL#//" /etc/bind/named.conf.options
 fi
@@ -205,5 +210,10 @@ else
   sed -i "s/#ENABLE_MAX_DNSNCACHE_TTL#//" /etc/bind/named.conf.options
 fi
 
-echo "finished bootstrapping."
+if [ "${FORWARD_ONLY}" = true ] ; then
+  sed -i "s/#FORWARD_ONLY#/forward only;/" /etc/bind/named.conf.options
+else
+  sed -i "s/#FORWARD_ONLY#//" /etc/bind/named.conf.options
+fi
 
+echo "finished bootstrapping."
