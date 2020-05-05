@@ -187,7 +187,12 @@ if ! [ -z "${PASSTHRU_IPS}" ]; then
     echo ";## Additional RPZ passthroughs"                                          
     echo "32.$(reverseip $IP).rpz-client-ip      CNAME rpz-passthru." >> ${RPZ_ZONE}
   done                                                                                
-fi                                                                                      
+fi       
+
+# Ensure there is a file for BIND to see, even if it's empty
+if [ ! -f "$CUSTOM_ZONE" ]; then
+   touch $CUSTOM_ZONE;
+fi
 
 # Add line for custom domains
 echo "\$INCLUDE $CUSTOM_ZONE" >> ${RPZ_ZONE}
