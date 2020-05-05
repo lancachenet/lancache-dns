@@ -72,6 +72,8 @@ notes.<your domain>        A       10.0.0.230
 games.<your domain>        A       10.0.0.230
 files.<your domain>        A       10.0.0.231
 ```
+For more information on the RPZ format, see the BIND9 documentation:
+https://downloads.isc.org/isc/bind9/9.14.6/doc/arm/Bv9ARM.ch05.html#zone_file
 
 ## Running on Startup
 
