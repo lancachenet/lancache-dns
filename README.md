@@ -8,6 +8,8 @@ The documentation for the LanCache.net project can be found on [our website](htt
 
 The specific documentation for this lancache-dns container is [here](http://lancache.net/docs/containers/dns/)
 
+If you have any problems after reading the documentation please see [the support page](http://lancache.net/support/) before opening a new issue on github.
+
 ## License
 
 The MIT License (MIT)
