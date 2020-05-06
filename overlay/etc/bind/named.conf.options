@@ -7,6 +7,9 @@ options {
         allow-query-cache { any; };
         listen-on { any; };
         listen-on-v6 { any; };
+	
+	# Permit RFC1918 PTR lookups to be recursed upstream
+	empty-zones-enable no;
 		response-policy { zone "rpz"; };
 		rrset-order { order cyclic; };
         #ENABLE_UPSTREAM_DNS#forwarders { dns_ip; };

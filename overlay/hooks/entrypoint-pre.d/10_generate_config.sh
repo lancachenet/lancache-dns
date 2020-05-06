@@ -20,27 +20,6 @@ reverseip () {
     echo $4.$3.$2.$1 
 }                    
 
-export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
-pushd ${DOMAINS_PATH}
-if [[ ! -d .git ]]; then
-	git clone ${CACHE_DOMAINS_REPO} .
-fi
-
-if [[ "${NOFETCH:-false}" != "true" ]]; then
-	git remote set-url origin ${CACHE_DOMAINS_REPO}
-	git fetch origin
-	git reset --hard origin/master
-fi
-popd
-
-echo "     _                                      _                       _   "
-echo "    | |                                    | |                     | |  "
-echo " ___| |_ ___  __ _ _ __ ___   ___ __ _  ___| |__   ___   _ __   ___| |_ "
-echo "/ __| __/ _ \\/ _\` | '_ \` _ \\ / __/ _\` |/ __| '_ \\ / _ \\ | '_ \\ / _ \\ __|"
-echo "\\__ \\ ||  __/ (_| | | | | | | (_| (_| | (__| | | |  __/_| | | |  __/ |_ "
-echo "|___/\\__\\___|\\__,_|_| |_| |_|\\___\\__,_|\\___|_| |_|\\___(_)_| |_|\\___|\\__|"
-echo ""
-echo ""
 if ! [ -z "${UPSTREAM_DNS}" ] ; then
   echo "configuring /etc/resolv.conf to stop from looping to ourself"
   echo "# Lancache dns config" > /etc/resolv.conf
@@ -52,7 +31,24 @@ if ! [ -z "${UPSTREAM_DNS}" ] ; then
 fi
 echo ""
 
+echo "Bootstrapping Lancache-DNS from ${CACHE_DOMAINS_REPO}"
 
+export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+pushd ${DOMAINS_PATH} > /dev/null
+if [[ ! -d .git ]]; then
+	git clone ${CACHE_DOMAINS_REPO} .
+fi
+
+if [[ "${NOFETCH:-false}" != "true" ]]; then
+	# Disable error checking whilst we attempt to get latest
+	set +e
+	git remote set-url origin ${CACHE_DOMAINS_REPO}
+	git fetch origin || echo "Failed to update from remote, using local copy of cache_domains"
+	git reset --hard origin/${CACHE_DOMAINS_BRANCH}
+	# Reenable error checking
+	set -e
+fi
+popd > /dev/null
 
 if [ "$USE_GENERIC_CACHE" = "true" ]; then
   if [ -z "${LANCACHE_IP}" ]; then
@@ -65,8 +61,6 @@ else
     exit 1
   fi
 fi
-
-echo "Bootstrapping DNS from ${CACHE_DOMAINS_REPO}"
 
 if [ "$USE_GENERIC_CACHE" = "true" ]; then
     echo ""
