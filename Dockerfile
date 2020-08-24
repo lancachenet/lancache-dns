@@ -12,6 +12,7 @@ RUN	mkdir -p /var/cache/bind /var/log/named		\
 RUN git clone --depth=1 --no-single-branch https://github.com/uklans/cache-domains/ /opt/cache-domains
 
 EXPOSE 53/udp
+EXPOSE 53/tcp
 
 WORKDIR /scripts
 
