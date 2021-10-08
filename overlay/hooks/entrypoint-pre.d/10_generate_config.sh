@@ -200,7 +200,7 @@ if [ "${ENABLE_DNSSEC_VALIDATION}" = true ] ; then
 	sed -i "s/dnssec-validation no/dnssec-validation auto/" /etc/bind/named.conf.options
 else
 	echo "Disabling dnssec validation"
-	sed -i "s/dnssec-validation no//" /etc/bind/named.conf.options
+	sed -i "s/dnssec-validation no;//" /etc/bind/named.conf.options
 fi
 
 echo "finished bootstrapping."
