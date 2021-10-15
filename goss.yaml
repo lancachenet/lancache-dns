@@ -15,19 +15,19 @@ dns:
   blizzard.cache.lancache.net:
     resolvable: true
     addrs: 
-    - 127.0.0.1
+    - 10.0.0.1
     timeout: 500
     server: 127.0.0.1
   epicgames.cache.lancache.net:
     resolvable: true
     addrs: 
-    - 127.0.0.1
+    - 10.0.0.1
     timeout: 500
     server: 127.0.0.1
   steam.cache.lancache.net:
     resolvable: true
     addrs: 
-    - 127.0.0.2
+    - 10.0.0.2
     timeout: 500
     server: 127.0.0.1
 process:
