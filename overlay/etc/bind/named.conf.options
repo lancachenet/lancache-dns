@@ -7,6 +7,9 @@ options {
         allow-query-cache { any; };
         listen-on { any; };
         listen-on-v6 { any; };
+	max-cache-ttl 0;
+	max-ncache-ttl 0;
+	forward only;
 	
 	# Permit RFC1918 PTR lookups to be recursed upstream
 	empty-zones-enable no;
