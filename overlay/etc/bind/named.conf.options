@@ -10,12 +10,17 @@ options {
 	max-cache-ttl 0;
 	max-ncache-ttl 0;
 	forward only;
+	zone-statistics yes;
 	
 	# Permit RFC1918 PTR lookups to be recursed upstream
 	empty-zones-enable no;
 		response-policy { zone "rpz"; };
 		rrset-order { order cyclic; };
         #ENABLE_UPSTREAM_DNS#forwarders { dns_ip; };
+};
+
+statistics-channels {
+    inet 0.0.0.0 port 8053;
 };
 
 logging {

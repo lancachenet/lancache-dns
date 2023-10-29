@@ -13,6 +13,7 @@ RUN git clone --depth=1 --no-single-branch https://github.com/uklans/cache-domai
 
 EXPOSE 53/udp
 EXPOSE 53/tcp
+EXPOSE 8053/tcp
 
 WORKDIR /scripts
 
