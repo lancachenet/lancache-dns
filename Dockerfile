@@ -1,4 +1,4 @@
-FROM golang:1.17.2-alpine AS builder-dnstool
+FROM golang:1.23.1-alpine AS builder-dnstool
 
 WORKDIR /go/src/
 
@@ -8,11 +8,11 @@ apk --no-cache add git
 
 RUN \
 echo ">> Clone dnstool repo..." && \
-git clone https://github.com/nightah/dnstool.git .
+git clone https://github.com/lancachenet/dnstool.git .
 
 RUN \
 echo ">> Starting go build..." && \
-CGO_ENABLED=0 go build -trimpath
+CGO_ENABLED=0 go build -trimpath -ldflags "-s -w"
 
 FROM lancachenet/ubuntu:latest
 MAINTAINER LanCache.Net Team <team@lancache.net>
@@ -21,7 +21,7 @@ ENV STEAMCACHE_DNS_VERSION=1 ENABLE_DNSSEC_VALIDATION=false LANCACHE_DNSDOMAIN=c
 RUN apt-get update && apt-get install -y bind9 curl dnsutils git
 
 COPY overlay/ /
-COPY --from=builder-dnstool /go/src/dnstool /hooks/entrypoint-pre.d/10_generate_config
+COPY --from=builder-dnstool /go/src/dnstool /usr/local/bin/dnstool
 
 RUN	mkdir -p /var/cache/bind /var/log/named		\
 	&& chown bind:bind /var/cache/bind /var/log/named
