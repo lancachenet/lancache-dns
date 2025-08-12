@@ -26,7 +26,8 @@ COPY --from=builder-dnstool /go/src/dnstool /usr/local/bin/dnstool
 RUN	mkdir -p /var/cache/bind /var/log/named		\
 	&& chown bind:bind /var/cache/bind /var/log/named
 
-RUN git clone --depth=1 --no-single-branch https://github.com/uklans/cache-domains/ /opt/cache-domains
+# # Removed git clone operation
+# RUN mkdir -p /opt/cache-domains
 
 EXPOSE 53/udp
 EXPOSE 53/tcp
