@@ -8,9 +8,9 @@ workflows:
           requires:
             - test
           filters:
-             branches:
-               only: 
-                 - master
+            branches:
+              only:
+                - master
 version: 2
 jobs:
   test:
@@ -19,7 +19,7 @@ jobs:
     steps:
       - checkout
 
-      - setup_remote_docker:   # (2)
+      - setup_remote_docker: # (2)
           docker_layer_caching: false # (3)
       - run:
           name: Install goss
@@ -46,8 +46,7 @@ jobs:
             docker save -o workspace/lancachenet-lancache-dns.tar lancachenet/lancache-dns:goss-test
       - persist_to_workspace:
           root: workspace
-          paths:
-            lancachenet-lancache-dns.tar
+          paths: lancachenet-lancache-dns.tar
       - store_test_results:
           path: reports
       - store_artifacts:
@@ -57,7 +56,7 @@ jobs:
     docker:
       - image: circleci/python:2-jessie
     steps:
-      - setup_remote_docker:   # (2)
+      - setup_remote_docker: # (2)
           docker_layer_caching: false # (3)
       - attach_workspace:
           at: /tmp/workspace
