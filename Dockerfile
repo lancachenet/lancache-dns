@@ -1,4 +1,4 @@
-FROM golang:1.23.1-alpine AS builder-dnstool
+FROM golang:1.27.1-alpine AS builder-dnstool
 
 WORKDIR /go/src/
 
