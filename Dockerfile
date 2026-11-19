@@ -1,4 +1,4 @@
-FROM golang:1.27.1-alpine AS builder-dnstool
+FROM golang:1.27-alpine AS builder-dnstool
 
 WORKDIR /go/src/
 
@@ -33,6 +33,7 @@ ENV \
 # hadolint ignore=DL3008
 RUN <<EOF
   apt-get update
+  apt-get -y upgrade
   apt-get install -y bind9 ca-certificates curl dnsutils git --no-install-recommends
   apt-get -y clean
   rm -rf /var/lib/apt/lists/*
@@ -53,3 +54,4 @@ COPY --link --from=builder-dnstool /go/src/dnstool /usr/local/bin/dnstool
 EXPOSE 53/udp
 EXPOSE 53/tcp
 WORKDIR /scripts
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s CMD dig +time=2 +tries=1 +norecurse @127.0.0.1 . NS | grep -q 'status: NOERROR'

@@ -35,3 +35,7 @@ process:
     running: true
   supervisord:
     running: true
+command:
+  named-checkconf-clean:
+    exec: "out=$(named-checkconf /etc/bind/named.conf 2>&1) && test -z \"$out\""
+    exit-status: 0
